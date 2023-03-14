@@ -1,0 +1,44 @@
+name: backend-py
+on:
+  pull_request:
+    paths:
+      - ".github/actions/setup-test"
+      - ".github/workflows/backend-py.yml"
+      - "backend-py/**"
+  push:
+    branches:
+      - main
+
+jobs:
+  test:
+    timeout-minutes: 10
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-python@v4
+        with:
+          python-version: "3.9"
+
+      - uses: "./.github/actions/setup-test"
+
+      - name: Install Python Dependecies
+        working-directory: backend-py
+        run: pip install -r requirements.txt
+
+      - name: Run Tests
+        working-directory: backend-py
+        run: pytest
+
+  docker:
+    timeout-minutes: 10
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Test image starts up
+        run: |
+          cp .env.sample .env
+          docker compose up -d frontend backend-py
+          curl --request GET http://0.0.0.0:5100 || docker compose logs
