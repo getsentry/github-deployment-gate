@@ -175,6 +175,80 @@ ALTER TABLE public.sentry_installation_id_seq OWNER TO admin;
 
 ALTER SEQUENCE public.sentry_installation_id_seq OWNED BY public.sentry_installation.id;
 
+--
+-- Name: github_repo; Type: TABLE; Schema: public; Owner: admin
+--
+
+CREATE TABLE public.github_repo (
+    id integer NOT NULL,
+    name character varying(255),
+    sentry_project_slug character varying(255),
+    wait_period_to_check_for_issue integer,
+    sentry_installation_id integer,
+    user_id integer,
+);
+
+
+ALTER TABLE public.github_repo OWNER TO admin;
+
+--
+-- Name: github_repo_id_seq; Type: SEQUENCE; Schema: public; Owner: admin
+--
+
+CREATE SEQUENCE public.github_repo_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE public.github_repo_id_seq OWNER TO admin;
+
+--
+-- Name: github_repo_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: admin
+--
+
+ALTER SEQUENCE public.github_repo_id_seq OWNED BY public.github_repo.id;
+
+
+--
+-- Name: deployment_protection_rule_request; Type: TABLE; Schema: public; Owner: admin
+--
+
+CREATE TABLE public.deployment_protection_rule_request (
+    id integer NOT NULL,
+    status character varying(255),
+    created_at datetime,
+    github_repo_id integer,
+);
+
+
+ALTER TABLE public.deployment_protection_rule_request OWNER TO admin;
+
+--
+-- Name: deployment_protection_rule_request_id_seq; Type: SEQUENCE; Schema: public; Owner: admin
+--
+
+CREATE SEQUENCE public.deployment_protection_rule_request_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE public.deployment_protection_rule_request_id_seq OWNER TO admin;
+
+--
+-- Name: deployment_protection_rule_request_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: admin
+--
+
+ALTER SEQUENCE public.deployment_protection_rule_request_id_seq OWNED BY public.deployment_protection_rule_request.id;
+
+
 
 --
 -- Name: user; Type: TABLE; Schema: public; Owner: admin
@@ -183,6 +257,8 @@ ALTER SEQUENCE public.sentry_installation_id_seq OWNED BY public.sentry_installa
 CREATE TABLE public."user" (
     id integer NOT NULL,
     name character varying(255),
+    github_handle character varying(255),
+    refresh_token character varying(255),
     username character varying(255),
     avatar character varying(255),
     organization_id integer
@@ -239,6 +315,19 @@ ALTER TABLE ONLY public.sentry_installation ALTER COLUMN id SET DEFAULT nextval(
 --
 
 ALTER TABLE ONLY public."user" ALTER COLUMN id SET DEFAULT nextval('public.user_id_seq'::regclass);
+
+
+--
+-- Name: github_repo id; Type: DEFAULT; Schema: public; Owner: admin
+--
+
+ALTER TABLE ONLY public.github_repo ALTER COLUMN id SET DEFAULT nextval('public.github_repo_seq'::regclass);
+
+--
+-- Name: deployment_protection_rule_request id; Type: DEFAULT; Schema: public; Owner: admin
+--
+
+ALTER TABLE ONLY public.deployment_protection_rule_request ALTER COLUMN id SET DEFAULT nextval('public.deployment_protection_rule_request_seq'::regclass);
 
 
 --
@@ -307,6 +396,18 @@ SELECT pg_catalog.setval('public.sentry_installation_id_seq', 1, false);
 
 
 --
+-- Name: github_repo_id_seq; Type: SEQUENCE SET; Schema: public; Owner: admin
+--
+
+SELECT pg_catalog.setval('public.github_repo_id_seq', 1, false);
+
+--
+-- Name: deployment_protection_rule_request_id_seq; Type: SEQUENCE SET; Schema: public; Owner: admin
+--
+
+SELECT pg_catalog.setval('public.deployment_protection_rule_request_id_seq', 1, false);
+
+--
 -- Name: user_id_seq; Type: SEQUENCE SET; Schema: public; Owner: admin
 --
 
@@ -327,6 +428,20 @@ ALTER TABLE ONLY public.item
 
 ALTER TABLE ONLY public.organization
     ADD CONSTRAINT organization_pkey PRIMARY KEY (id);
+
+--
+-- Name: github_repo github_repo_pkey; Type: CONSTRAINT; Schema: public; Owner: admin
+--
+
+ALTER TABLE ONLY public.github_repo
+    ADD CONSTRAINT github_repo_pkey PRIMARY KEY (id);
+
+--
+-- Name: deployment_protection_rule_request deployment_protection_rule_request_pkey; Type: CONSTRAINT; Schema: public; Owner: admin
+--
+
+ALTER TABLE ONLY public.deployment_protection_rule_request
+    ADD CONSTRAINT deployment_protection_rule_request_pkey PRIMARY KEY (id);    
 
 
 --
@@ -351,6 +466,31 @@ ALTER TABLE ONLY public."user"
 
 ALTER TABLE ONLY public.item
     ADD CONSTRAINT item_assignee_id_fkey FOREIGN KEY (assignee_id) REFERENCES public."user"(id) ON UPDATE CASCADE ON DELETE CASCADE;
+
+
+--
+-- Name: deployment_protection_rule_request deployment_protection_rule_request_github_repo_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: admin
+--
+
+ALTER TABLE ONLY public.deployment_protection_rule_request
+    ADD CONSTRAINT deployment_protection_rule_request_github_repo_id_fkey FOREIGN KEY (github_repo_id) REFERENCES public.github_repo(id) ON UPDATE CASCADE ON DELETE CASCADE;
+
+
+--
+-- Name: github_repo github_repo_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: admin
+--
+
+ALTER TABLE ONLY public.github_repo
+    ADD CONSTRAINT github_repo_user_id_fkey FOREIGN KEY (user_id) REFERENCES public."user"(id) ON UPDATE CASCADE ON DELETE CASCADE;
+
+
+--
+-- Name: github_repo github_repo_sentry_installation_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: admin
+--
+
+ALTER TABLE ONLY public.github_repo
+    ADD CONSTRAINT github_repo_sentry_installation_id_fkey FOREIGN KEY (sentry_installation_id) REFERENCES public.sentry_installation(id) ON UPDATE CASCADE ON DELETE CASCADE;
+
 
 
 --

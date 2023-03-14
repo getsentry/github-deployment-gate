@@ -9,6 +9,14 @@ export default class User extends Model {
   name: string;
 
   @Column
+  githubHandle: string;
+
+  @Column
+  refreshToken: string;
+
+  // Delete the below fields
+
+  @Column
   username: string;
 
   @Column

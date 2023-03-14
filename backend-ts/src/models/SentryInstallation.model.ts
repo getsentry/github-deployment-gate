@@ -19,6 +19,8 @@ export default class SentryInstallation extends Model {
   @Column
   expiresAt: Date;
 
+  // Delete the below fields
+
   @ForeignKey(() => Organization)
   @Column
   organizationId: number;
