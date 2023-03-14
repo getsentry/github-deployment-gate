@@ -2,7 +2,7 @@
 
 ## Setup
 
-1. Ensure this application is running (`make serve-typescript` or `make serve-python`) and has been [installed on your organization in Sentry](../installation.md).
+1. Ensure this application is running (`make serve-typescript`) and has been [installed on your organization in Sentry](../installation.md).
 2. Create a new alert (Alerts > Create Alert)
 3. To setup a test issue alert, select 'Issues' then 'Set Conditions'
    1. Give the rule a name, and a the 'A new issue is created' trigger
@@ -22,7 +22,6 @@
 For testing, refer to [Alert Webhooks docs](../webhooks/alert-webhooks.md#testing).
 
 ## Code Insights
-
 
 For code insights, refer to [Alert Webhooks docs](../webhooks/alert-webhooks.md#code-insights).
 

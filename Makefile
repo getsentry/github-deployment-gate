@@ -4,11 +4,9 @@ help:
 	@echo 'Welcome to the Integration Platform Example a.k.a. ACME Kanban 🚀!'
 	@echo
 	@echo '>>> Quickstart'
-	@echo 'make serve-python        -> Start the python backend + frontend'
 	@echo 'make serve-typescript    -> Start the typescript backend + frontend'
 	@echo
 	@echo '>>> Debugging'
-	@echo 'make setup-python        -> Rebuild the python backend with updated dependencies and environment variables'
 	@echo 'make setup-typescript    -> Rebuild the typescript backend with updated dependencies and environment variables'
 	@echo 'make seed-db             -> Initialize the database with test data (Note: requires "make teardown" execution beforehand)'
 	@echo 'make dump-db             -> Replace the data in the seed file with the current database'
@@ -20,16 +18,10 @@ help:
 
 # Quickstart
 
-serve-python:
-	docker compose up --build frontend backend-py
-
 serve-typescript:
 	docker compose up --build frontend backend-ts
 
 # Debugging
-
-setup-python:
-	docker compose build frontend backend-py
 
 setup-typescript:
 	docker compose build frontend backend-ts

@@ -51,7 +51,7 @@ To maintainers: If this becomes annoying to maintain, feel free to remove it!
 - [**Sentry**](https://sentry.io) - You must be either a Manager or Owner of an organization on Sentry.
 - [**Docker**](https://docs.docker.com/get-docker/) - This demo application uses Docker to setup and communicate between its different services.
 - **Disable your adblocker** - This is a common pitfall that developers fall into when building on Sentry, doing it early can save your time down the line!
-- **Select a codebase** - This demo application comes with a mock frontend and a choice between two backends, one in Node (Express, Sequelize, TypeScript) and another in Python (Flask, SQLAlchemy). Pick the commands and environment that is more appropriate for your implementation.
+- **Select a codebase** - This demo application comes with a mock frontend and a Node backend(Express, Sequelize, TypeScript).
 - **A local PostgreSQL DB Client** (Optional) - Great for viewing changes on objects, and debugging, removing, or editing data. We suggest [Postico](https://eggerapps.at/postico/).
 
 ### Step 0: Choose an Integration
@@ -81,10 +81,6 @@ tunnels:
     proto: http
     # Make sure this addr matches REACT_APP_PORT in .env
     addr: 3000
-  acme-backend-py:
-    proto: http
-    # Make sure this addr matches FLASK_RUN_PORT in .env
-    addr: 5100
   acme-backend-ts:
     proto: http
     # Make sure this addr matches EXPRESS_LISTEN_PORT in .env
@@ -109,7 +105,6 @@ Region              United States (us)
 Latency             96.595653ms
 Web Interface       http://127.0.0.1:4040
 Forwarding          https://random-uuid-frontend.ngrok.io -> http://localhost:3000
-Forwarding          https://random-uuid-backend-py.ngrok.io -> http://localhost:5100
 Forwarding          https://random-uuid-backend-ts.ngrok.io -> http://localhost:5200
 
 Connections         ttl     opn     rt1     rt5     p50     p90
@@ -120,7 +115,6 @@ Take a note of the forwarding addresses (ending with `.ngrok.io`), as you'll nee
 
 ```text
 [Frontend address]           -> http://localhost:3000
-[Python backend address]     -> http://localhost:5100
 [Typescript backend address] -> http://localhost:5200
 ```
 
@@ -135,8 +129,8 @@ Next, we'll be setting up an integration for our app to connect to, and a projec
 3. Specify a Webhook and Redirect URL with your ngrok forwarding address.
    - Webhook URL: `<YOUR BACKEND NGROK ADDRESS>/api/sentry/webhook/`
    - Redirect URL: `<YOUR FRONTEND NGROK ADDRESS>/sentry/setup/`
-     Using the above example, with the python backend, it may look like this:
-   - Webhook URL: `https://random-uuid-backend-py.ngrok.io/api/sentry/webhook/`
+     Using the above example, with the backend, it may look like this:
+   - Webhook URL: `https://random-uuid-backend-ts.ngrok.io/api/sentry/webhook/`
    - Redirect URL: `https://random-uuid-frontend.ngrok.io/sentry/setup/`
 4. Ensure 'Verify Installation' is checked.
 5. Ensure 'Alert Rule Action' is checked.
@@ -179,23 +173,17 @@ Great, now we're ready to serve our application!
 
 ### Step 4: Build and serve the codebase
 
-This example code comes with a mock frontend and a choice between two backends, one in NodeJS (Express + TS) and another in Python (Flask). To launch the application, you'll need to install [Docker](https://docs.docker.com/engine/install/) and ensure it is running.
+This example code comes with a mock frontend and a NodeJS backend(Express + TS). To launch the application, you'll need to install [Docker](https://docs.docker.com/engine/install/) and ensure it is running.
 
-> Note: If you are using an M1 Mac, you may encounter an [issue](https://github.com/getsentry/integration-platform-example/issues/48) building the Python container. Running `export DOCKER_DEFAULT_PLATFORM=linux/amd64` prior to building the images should solve the issue. [Learn More](https://stackoverflow.com/questions/62807717/how-can-i-solve-postgresql-scram-authentifcation-problem).
-
-Now you can spin up the project of your choice with:
+Now you can spin up the project with:
 
 ```bash
-make serve-python # A python server built on Flask and SQLAlchemy
-# OR
 make serve-typescript # A typescript node server built on Express and Sequelize
 ```
 
 This command will build the Docker images needed to run the application (a Postgres database, a web application, and your chosen backend), and spin them up, all in one step! Once the server logs calm down, your application should be good to go! If you make any changes to the environment variables after this point, be sure to rebuild the images with:
 
 ```bash
-make setup-python
-# OR
 make setup-typescript
 ```
 

@@ -4,7 +4,7 @@
 
 > **Note**: If you've configured Alert Rule Actions, you should refer to the [those setup instructions](../ui-components/alert-rule-actions.md) instead.
 
-1. Ensure this application is running (`make serve-typescript` or `make serve-python`) and has been [installed on your organization in Sentry](../installation.md).
+1. Ensure this application is running (`make serve-typescript`) and has been [installed on your organization in Sentry](../installation.md).
 2. Create a new alert (Alerts > Create Alert)
 3. To setup a test issue alert, select 'Issues' then 'Set Conditions'
    1. Give the rule a name, and a the 'A new issue is created' trigger
@@ -31,7 +31,6 @@
 3. To test alert triggers repeatedly while developing, we recommend take advantage of the [ngrok's inspection interface](https://ngrok.com/docs/secure-tunnels#inspecting-requests) (located by default on http://localhost:4040/inspect/http)
 4. When any of these alerts have been triggered, a new item with the corresponding alert information should appear in your kanban view.
 
-
 ## Code Insights
 
 If you monitor server logs during the above alert rule webhooks test, you should see something similar to the following:
@@ -55,23 +54,25 @@ Modified item from metric alert resolved trigger
 ```
 
 All the authorization logs are coming from middleware which verifies the request signature with the shared secret:
-   - [Python Signature Verification](../../backend-py/src/api/middleware/verify_sentry_signature.py)
-   - [TypeScript Signature Verification](../../backend-ts/src/api/middleware/verifySentrySignature.ts)
+
+- [TypeScript Signature Verification](../../backend-ts/src/api/middleware/verifySentrySignature.ts)
 
 The 'Populating user options' log comes from the select field we specify in the schema:
-   - [Integration Schema](../../integration-schema.json) (Look at the blob under `elements[1].settings.required_fields`)
+
+- [Integration Schema](../../integration-schema.json) (Look at the blob under `elements[1].settings.required_fields`)
 
 It tells Sentry what endpoint to ping and use to populate options in a Select field.
-   - [Python Options Response Code](../../backend-py/src/api/endpoints/sentry/options.py)
-   - [TypeScript Options Response Code](../../backend-ts/src/api/sentry/options.ts)
+
+- [TypeScript Options Response Code](../../backend-ts/src/api/sentry/options.ts)
 
 The 'Successful validation' log comes from Sentry pinging another endpoint we specifiy in the schema
-   - [Integration Schema](../../integration-schema.json) (Look at the blob under `elements[1].uri`)
+
+- [Integration Schema](../../integration-schema.json) (Look at the blob under `elements[1].uri`)
 
 Here, we're validating the settings that the user sent to our application. Then, we tell Sentry whether or not it should approve the changes to the alert rule. If something is incorrect, we can surface error messages directly to the user in Sentry.
-   - [Python Settings Approval Code](../../backend-py/src/api/endpoints/sentry/alert_rule_action.py)
-   - [TypeScript Settings Approval Code](../../backend-ts/src/api/sentry/alertRuleAction.ts)
+
+- [TypeScript Settings Approval Code](../../backend-ts/src/api/sentry/alertRuleAction.ts)
 
 The 'Created/Modified item' logs come from the consumption of the alert webhooks.
-   - [Python Alert Webhook Consumption](../../backend-py/src/api/endpoints/sentry/handlers/alert_handler.py)
-   - [TypeScript Alert Webhook Consumption](../../backend-ts/src/api/sentry/handlers/alertHandler.ts)
+
+- [TypeScript Alert Webhook Consumption](../../backend-ts/src/api/sentry/handlers/alertHandler.ts)

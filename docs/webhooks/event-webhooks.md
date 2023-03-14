@@ -2,21 +2,21 @@
 
 ## Testing
 
-1. Ensure this application is running (`make serve-typescript` or `make serve-python`) and has been [installed on your organization in Sentry](../installation.md).
+1. Ensure this application is running (`make serve-typescript`) and has been [installed on your organization in Sentry](../installation.md).
 2. Select an organization's kanban to view
 3. Trigger the `issue.created` webhook by clicking 'Send Error to Sentry'
-	- Use the input field to change the name of the error. If the name is changed, a new issue shall be created, rather than adding an event to the same issue.
-	- Note: You may need to disable your adblocker for this button to work as intended!
+   - Use the input field to change the name of the error. If the name is changed, a new issue shall be created, rather than adding an event to the same issue.
+   - Note: You may need to disable your adblocker for this button to work as intended!
 4. Soon after, you can refresh the kanban to see a new item appear from the webhook firing.
 5. Open Sentry, and navigate to Issues
 6. Filter by selecting the project you created to this app's DSN (See [README, Step 2](../../README.md))
 7. Find and select the new error you triggered ('Test Error #1' by default)
 8. Trigger the `issue.assigned` webhook by selecting an assignee in the dropdown
-	- Note: These webhooks only fire on the transition from Unassigned -> Assigned, not a change of assignee
+   - Note: These webhooks only fire on the transition from Unassigned -> Assigned, not a change of assignee
 9. Refresh the kanban to verify that they now appear assigned to a user
 10. Trigger the `issue.resolved` webhook by clicking the resolve button
 11. Refresh the kanban to verify that the item's column has now been shifted to 'Done'
-12.  Trigger the `issue.ignored` webhook by clicking the ignore button
+12. Trigger the `issue.ignored` webhook by clicking the ignore button
 13. Refresh one last time to verify the item appears translucent in the kanban.
 
 ## Code Insights
@@ -55,13 +55,10 @@ Marked item as ignored
 Broadly, the steps in handling these webhooks are as follows:
 
 1. Verify the signature. The authorization comes from verifying the request signature with the shared secret
-   - [Python Signature Verification](../../backend-py/src/api/middleware/verify_sentry_signature.py)
    - [TypeScript Signature Verification](../../backend-ts/src/api/middleware/verifySentrySignature.ts)
 2. Logging the type of webhook the application is receiving before handling it. This is helpful just for debugging and sanity checking.
-   - [Python Webhook Logging](../../backend-py/src/api/endpoints/sentry/webhook.py)
    - [TypeScript Webhook Logging](../../backend-ts/src/api/sentry/webhook.ts)
 3. Pass the webhook along to a dedicated handler to keep the webhook endpoint clean
-   - [Python Issue Webhook Handler](../../backend-py/src/api/endpoints/sentry/handlers/issue_handler.py)
    - [TypeScript Issue Webhook Handler](../../backend-ts/src/api/sentry/handlers/issueHandler.ts)
 4. Check if the issue exists in our application
    - In this example, it's checking if we already have a ticket for the issue, and creating one if not

@@ -1,28 +1,5 @@
 version: "3.9"
 services:
-  backend-py:
-    container_name: backend-py
-    env_file:
-      - .env
-    depends_on:
-      database:
-        condition: service_healthy
-    build:
-      context: backend-py
-      target: backend-py
-    ports:
-      - "${FLASK_RUN_PORT}:${FLASK_RUN_PORT}"
-    # Watch and react to changes in local...
-    volumes:
-      #  backend-py/src directory
-      - type: bind
-        source: ./backend-py/src
-        target: /backend-py/src
-      #  data directory
-      - type: bind
-        source: ./data
-        target: /data
-
   backend-ts:
     container_name: backend-ts
     env_file:
