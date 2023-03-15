@@ -6,78 +6,65 @@ import BasePage from '../components/BasePage';
 import Button from '../components/Button';
 import Main from '../components/Main';
 import SentryLogo from '../components/SentryLogo';
-import ThemedSelect from '../components/ThemedSelect';
-import {Organization} from '../types';
+import {SENTRY_INSTALLATION_ID, SENTRY_ORG_SLUG} from '../constants/browserStorage';
 import {makeBackendRequest} from '../util';
 
 const REDIRECT_TIMEOUT = 3 * 1000;
 
 function SetupPage() {
-  const [organizationId, setOrganizationId] = useState(null);
-  const [organizations, setOrganizations] = useState<Organization[]>([]);
+  function loginWithGithub() {
+    window.location.assign(
+      `https://github.com/login/oauth/authorize?client_id=${process.env.REACT_APP_GITHUB_CLIENT_ID}`
+    );
+  }
 
   const [redirect, setRedirect] = useState('');
+
   useEffect(() => {
     console.log('use effect started');
-    async function fetchData() {
-      const data: Organization[] =
-        (await makeBackendRequest('/api/organizations/')) || [];
-      setOrganizations(data);
+
+    async function createSentryInstallationEntry() {
+      const sentryInstallationId = searchParams.get('installationId');
+      const sentryOrgSlug = searchParams.get('orgSlug');
+      if (sentryInstallationId) {
+        window.localStorage.setItem(SENTRY_INSTALLATION_ID, sentryInstallationId);
+      }
+      if (sentryOrgSlug) {
+        window.localStorage.setItem(SENTRY_ORG_SLUG, sentryOrgSlug);
+      }
+      const payload = {
+        code: searchParams.get('code'),
+        installationId: sentryInstallationId,
+        sentryOrgSlug: sentryOrgSlug,
+      };
+      const {redirectUrl} = await makeBackendRequest('/api/sentry/setup/', payload, {
+        method: 'POST',
+      });
     }
-    fetchData();
+    // createSentryInstallationEntry();
   }, []);
   const [searchParams] = useSearchParams();
-
-  async function handleSubmit(e: React.SyntheticEvent) {
-    e.preventDefault();
-    const payload = {
-      code: searchParams.get('code'),
-      installationId: searchParams.get('installationId'),
-      sentryOrgSlug: searchParams.get('orgSlug'),
-      organizationId,
-    };
-    const {redirectUrl} = await makeBackendRequest('/api/sentry/setup/', payload, {
-      method: 'POST',
-    });
-    setRedirect(redirectUrl);
-    setTimeout(() => (window.location = redirectUrl), REDIRECT_TIMEOUT);
-  }
 
   return (
     <BasePage>
       <Main>
-        <form onSubmit={handleSubmit}>
-          <SentryApplicationLogo size={30} />
-          {redirect ? (
-            <React.Fragment>
-              <h2>You&apos;ve successfully linked ACME Kanban and Sentry!</h2>
-              <p>You should be redirected in a few seconds.</p>
-              <StyledLink href={redirect} data-testid="direct-link">
-                Take me back to Sentry
-              </StyledLink>
-            </React.Fragment>
-          ) : (
-            <React.Fragment>
-              <PreInstallTextBlock />
-              <OrganizationSelectFieldWrapper>
-                <SentryLogo size={20} />
-                <h4>{searchParams.get('orgSlug')}</h4>
-                <span>&gt;</span>
-                <StyledSelect
-                  options={organizations.map(({id, name}) => ({
-                    value: `${id}`,
-                    label: name,
-                  }))}
-                  onChange={({value}) => setOrganizationId(value)}
-                  placeholder="Select an Organization..."
-                />
-              </OrganizationSelectFieldWrapper>
-              <Button type="submit" className="primary" disabled={!organizationId}>
-                Submit
-              </Button>
-            </React.Fragment>
-          )}
-        </form>
+        <SentryApplicationLogo size={30} />
+        {redirect ? (
+          <React.Fragment>
+            <h2>You&apos;ve successfully linked ACME Kanban and Sentry!</h2>
+            <p>You should be redirected in a few seconds.</p>
+            <StyledLink href={redirect} data-testid="direct-link">
+              Take me back to Sentry
+            </StyledLink>
+          </React.Fragment>
+        ) : (
+          <React.Fragment>
+            <PreInstallTextBlock />
+            <Button className="primary" onClick={loginWithGithub}>
+              Login with Github
+            </Button>
+          </React.Fragment>
+        )}
       </Main>
     </BasePage>
   );
@@ -92,60 +79,18 @@ export const SentryApplicationLogo = styled(SentryLogo)`
   border-radius: 1rem;
 `;
 
-const OrganizationSelectFieldWrapper = styled.div`
-  display: flex;
-  justify-content: start;
-  align-items: center;
-  margin-bottom: 1rem;
-  svg {
-    min-width: 20px;
-  }
-  h4 {
-    margin: 1rem;
-    text-align: right;
-  }
-  & span {
-    flex: 0;
-  }
-`;
-
 const StyledLink = styled.a`
   color: ${p => p.theme.blue300};
 `;
 
-const StyledSelect = styled(ThemedSelect)`
-  flex: 1;
-  margin: 1rem;
-  font-size: ${p => p.theme.text.baseSize};
-  * {
-    white-space: normal !important;
-  }
-`;
-
 const PreInstallTextBlock = () => (
   <React.Fragment>
-    <h2>Complete your integration of Sentry with 🚀 ACME Kanban!</h2>
+    <h2>Complete your integration of Sentry with Sentry Github Deployment Gate!</h2>
     <p>
-      By completing this installation, you&apos;ll gain access to the following features:
+      By completing this installation, you&apos;ll be able to configure Sentry to
+      automatically fail the gate if any new issues are reported within a predetermined
+      time frame.
     </p>
-    <h3>Webhooks</h3>
-    <ul>
-      <li>Track error/issue volume in Sentry</li>
-      <li>Sync the comments/discussion happening in Sentry</li>
-      <li>Do fancy stuff when Sentry events fire</li>
-    </ul>
-    <h3>Issue Linking and Alerting</h3>
-    <ul>
-      <li>Associate tickets with issues in Sentry</li>
-      <li>Create tickets directly from Sentry</li>
-      <li>Trigger notifications from alert rules in Sentry</li>
-    </ul>
-    <h3>Miscellaneous</h3>
-    <ul>
-      <li>Access Sentry&apos;s API to do even more goodies</li>
-    </ul>
-    <hr />
-    <p>Please choose an organization with which to associate your Sentry installation:</p>
   </React.Fragment>
 );
 

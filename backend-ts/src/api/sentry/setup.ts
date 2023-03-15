@@ -1,7 +1,6 @@
 import axios from 'axios';
 import express from 'express';
 
-import Organization from '../../models/Organization.model';
 import SentryInstallation from '../../models/SentryInstallation.model';
 
 export type TokenResponseData = {
@@ -27,13 +26,7 @@ router.post('/', async (req, res) => {
   console.log('Redirect URL - Setup');
   console.log({req});
   // Destructure the all the body params we receive from the installation prompt
-  const {
-    code,
-    installationId,
-    sentryOrgSlug,
-    // Our frontend application tells us which organization to associate the install with
-    organizationId,
-  } = req.body;
+  const {code, installationId, sentryOrgSlug} = req.body;
 
   // Construct a payload to ask Sentry for a token on the basis that a user is installing
   const payload = {
@@ -53,14 +46,12 @@ router.post('/', async (req, res) => {
   //    - Make sure to associate the installationId and the tokenData since it's unique to the organization
   //    - Using the wrong token for the a different installation will result 401 Unauthorized responses
   const {token, refreshToken, expiresAt} = tokenResponse.data;
-  const organization = await Organization.findByPk(organizationId);
   await SentryInstallation.create({
     uuid: installationId as string,
     orgSlug: sentryOrgSlug as string,
     expiresAt: new Date(expiresAt),
     token,
     refreshToken,
-    organizationId: organization.id,
   });
 
   // Verify the installation to inform Sentry of the success
@@ -75,15 +66,11 @@ router.post('/', async (req, res) => {
     }
   );
 
-  // Update the associated organization to connect it to Sentry's organization
-  organization.externalSlug = sentryOrgSlug;
-  await organization.save();
-
   // Continue the installation process
   // - If your app requires additional configuration, this is where you can do it
   // - The token/refreshToken can be used to make requests to Sentry's API
   // - Once you're done, you can optionally redirect the user back to Sentry as we do below
-  console.info(`Installed ${verifyResponse.data.app.slug} on '${organization.name}'`);
+  console.info(`Installed ${verifyResponse.data.app.slug}'`);
   res.status(201).send({
     redirectUrl: `${process.env.SENTRY_URL}/settings/${sentryOrgSlug}/sentry-apps/${verifyResponse.data.app.slug}/`,
   });

@@ -3,11 +3,12 @@
 This directory contains the frontend code written in TypeScript.
 
 It was bootstrapped from [create-react-app](https://create-react-app.dev/). We opted to use Typescript via:
+
 ```shell
 npx create-react-app frontend --template typescript
 ```
-See more [here](https://create-react-app.dev/docs/adding-typescript/).
 
+See more [here](https://create-react-app.dev/docs/adding-typescript/).
 
 ## Development
 
