@@ -13,12 +13,14 @@ const REDIRECT_TIMEOUT = 3 * 1000;
 
 function SetupPage() {
   function loginWithGithub() {
+    const scope = 'offline_access';
     window.location.assign(
-      `https://github.com/login/oauth/authorize?client_id=${process.env.REACT_APP_GITHUB_CLIENT_ID}`
+      `https://github.com/login/oauth/authorize?client_id=${process.env.REACT_APP_GITHUB_CLIENT_ID}&scope=${scope}`
     );
   }
 
   const [redirect, setRedirect] = useState('');
+  const [setupAPICallState, setSetupAPICallState] = useState('loading');
 
   useEffect(() => {
     console.log('use effect started');
@@ -37,11 +39,13 @@ function SetupPage() {
         installationId: sentryInstallationId,
         sentryOrgSlug: sentryOrgSlug,
       };
-      const {redirectUrl} = await makeBackendRequest('/api/sentry/setup/', payload, {
+      const response = await makeBackendRequest('/api/sentry/setup/', payload, {
         method: 'POST',
       });
+      setSetupAPICallState(response.status);
+      console.log(response.status);
     }
-    // createSentryInstallationEntry();
+    createSentryInstallationEntry();
   }, []);
   const [searchParams] = useSearchParams();
 
@@ -49,21 +53,19 @@ function SetupPage() {
     <BasePage>
       <Main>
         <SentryApplicationLogo size={30} />
-        {redirect ? (
+        {setupAPICallState === 'error' ? (
           <React.Fragment>
-            <h2>You&apos;ve successfully linked ACME Kanban and Sentry!</h2>
-            <p>You should be redirected in a few seconds.</p>
-            <StyledLink href={redirect} data-testid="direct-link">
-              Take me back to Sentry
-            </StyledLink>
+            <h2>You can not access this page!</h2>
           </React.Fragment>
-        ) : (
+        ) : setupAPICallState === 'success' ? (
           <React.Fragment>
             <PreInstallTextBlock />
             <Button className="primary" onClick={loginWithGithub}>
               Login with Github
             </Button>
           </React.Fragment>
+        ) : (
+          <></>
         )}
       </Main>
     </BasePage>

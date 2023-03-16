@@ -27,6 +27,12 @@ router.post('/', async (req, res) => {
   console.log({req});
   // Destructure the all the body params we receive from the installation prompt
   const {code, installationId, sentryOrgSlug} = req.body;
+  if (!code || !installationId) {
+    res.status(403).json({
+      status: 'error',
+      message: 'Invalid code or installationId',
+    });
+  }
 
   // Construct a payload to ask Sentry for a token on the basis that a user is installing
   const payload = {
@@ -72,6 +78,7 @@ router.post('/', async (req, res) => {
   // - Once you're done, you can optionally redirect the user back to Sentry as we do below
   console.info(`Installed ${verifyResponse.data.app.slug}'`);
   res.status(201).send({
+    status: 'success',
     redirectUrl: `${process.env.SENTRY_URL}/settings/${sentryOrgSlug}/sentry-apps/${verifyResponse.data.app.slug}/`,
   });
 });

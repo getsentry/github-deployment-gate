@@ -18,7 +18,9 @@ const REDIRECT_TIMEOUT = 3 * 1000;
 function Home() {
   const [redirect, setRedirect] = useState('');
   const [rerender, setRerender] = useState(false);
-  const [githubHandle, setGithubHandle] = useState('');
+  const [githubHandle, setGithubHandle] = useState(
+    localStorage.getItem(GITHUB_HANDLE) ? localStorage.getItem(GITHUB_HANDLE) : ''
+  );
 
   async function getUserData() {
     const response = await makeBackendRequest(
@@ -38,7 +40,11 @@ function Home() {
   useEffect(() => {
     async function getAccessToken(code: string) {
       const response = await makeBackendRequest(
-        `/api/github/login/getAccessToken?code=${code}`,
+        `/api/github/login/getAccessToken?code=${code}&sentryInstallationId=${
+          localStorage.getItem(SENTRY_INSTALLATION_ID)
+            ? localStorage.getItem(SENTRY_INSTALLATION_ID)
+            : 'null'
+        }`,
         undefined,
         {
           method: 'GET',

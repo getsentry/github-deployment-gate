@@ -78,9 +78,9 @@ async function handleUninstall(
     return response.status(404);
   }
   // This is where you could destroy any associated data you've created alongside the installation
-  const organization = await Organization.findByPk(installation.organizationId);
-  organization.externalSlug = null;
-  await organization.save();
+  // const organization = await Organization.findByPk(installation.organizationId);
+  // organization.externalSlug = null;
+  // await organization.save();
   await installation.destroy();
   console.info(
     `Uninstalled ${installData.app.slug} from '${installData.organization.slug}'`
