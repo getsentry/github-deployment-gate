@@ -1,7 +1,6 @@
 import axios, {AxiosResponse, Method} from 'axios';
 
 import {TokenResponseData} from '../api/sentry/setup';
-import Organization from '../models/Organization.model';
 import SentryInstallation from '../models/SentryInstallation.model';
 
 class SentryAPIClient {
@@ -14,9 +13,9 @@ class SentryAPIClient {
   /**
    * Fetches an organization's Sentry API token, refreshing it if necessary.
    */
-  static async getSentryAPIToken(organization: Organization) {
+  static async getSentryAPIToken(sentryInstallationUUID: string) {
     const sentryInstallation = await SentryInstallation.findOne({
-      where: {organizationId: organization.id},
+      where: {uuid: sentryInstallationUUID},
     });
 
     // If the token is not expired, no need to refresh it
@@ -54,8 +53,8 @@ class SentryAPIClient {
   }
 
   // We create static wrapper on the constructor to ensure our token is always refreshed
-  static async create(organization: Organization) {
-    const token = await SentryAPIClient.getSentryAPIToken(organization);
+  static async create(sentryInstallationUUID: string) {
+    const token = await SentryAPIClient.getSentryAPIToken(sentryInstallationUUID);
     return new SentryAPIClient(token);
   }
 

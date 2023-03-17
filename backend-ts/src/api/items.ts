@@ -10,7 +10,7 @@ async function addSentryAPIData(
   organization: Organization & {items: Item[]}
 ): Promise<any[]> {
   // Create an APIClient to talk to Sentry
-  const sentry = await SentryAPIClient.create(organization);
+  const sentry = await SentryAPIClient.create('organization');
   return Promise.all(
     organization.items.map(async item => {
       if (item.sentryId) {

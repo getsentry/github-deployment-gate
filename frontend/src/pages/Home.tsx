@@ -91,7 +91,7 @@ function Home() {
         }
       );
       if (response && response.data) {
-        setSentryInstallation(response.data.sentryInstallation);
+        setSentryInstallation(response.data);
       }
       setIsFetchSentryInstallationAPILoading(false);
     }
