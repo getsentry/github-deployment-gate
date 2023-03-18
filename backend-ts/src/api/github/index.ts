@@ -112,6 +112,7 @@ async function getGithubRepos(userId: string) {
   const repos = await GithubRepo.findAll({
     where: {
       userId: userId,
+      isActive: true,
     },
   });
   return repos;

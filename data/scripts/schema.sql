@@ -70,6 +70,7 @@ CREATE TABLE public.github_repo (
     wait_period_to_check_for_issue integer,
     sentry_installation_id integer,
     user_id integer,
+    is_active boolean;
 );
 
 

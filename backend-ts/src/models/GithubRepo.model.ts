@@ -21,4 +21,7 @@ export default class GithubRepo extends Model {
   @ForeignKey(() => User)
   @Column
   userId: number;
+
+  @Column
+  isActive: boolean;
 }
