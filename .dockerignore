@@ -1,0 +1,14 @@
+# Node Ignores
+
+**/node_modules
+**/dist
+
+# Security Ignores
+
+.env
+
+# Misc Ignores
+
+.git
+.vscode
+\*.md
