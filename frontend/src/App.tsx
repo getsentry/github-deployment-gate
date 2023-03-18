@@ -3,8 +3,6 @@ import React from 'react';
 import {BrowserRouter as Router, Route, Routes} from 'react-router-dom';
 
 import Home from './pages/Home';
-import KanbanPage from './pages/KanbanPage';
-import LandingPage from './pages/LandingPage';
 import Login from './pages/Login';
 import SetupPage from './pages/SetupPage';
 import GlobalStyles from './styles/GlobalStyles';
@@ -17,8 +15,6 @@ function App() {
       <GlobalStyles />
       <Router>
         <Routes>
-          <Route path="/" element={<LandingPage />} />
-          <Route path="/:organizationSlug" element={<KanbanPage />} />
           <Route path="/sentry/setup" element={<SetupPage />} />
           <Route path="/home" element={<Home />} />
           <Route path="/login" element={<Login />} />
