@@ -77,41 +77,6 @@ router.get('/getAccessToken', async function (req, res) {
       message: 'Invalid code',
     });
   }
-
-  // console.log(req.query.code);
-  // const params = `?client_id=${process.env.GITHUB_CLIENT_ID}&client_secret=${process.env.GITHUB_CLIENT_SECRET}&code=${req.query.code}`;
-  // const response = await axios.post(
-  //   `https://github.com/login/oauth/access_token${params}`,
-  //   {
-  //     headers: {
-  //       Accept: 'application/json',
-  //     },
-  //   }
-  // );
-
-  // console.log(response);
-  // if (response.data && response.data.startsWith('access_token=')) {
-  //   const data = response.data;
-  //   const index = data.indexOf('&scope=&token_type=bearer');
-  //   const accessToken = data.substring(13, index);
-  //   const githubUserData = await getGithubUserData(`Bearer ${accessToken}`);
-  //   console.log(githubUserData);
-  //   await User.create({
-  //     name: githubUserData.data.login,
-  //     githubHandle: githubUserData.data.login,
-  //     refreshToken: accessToken,
-  //     avatar: githubUserData.data.avatar_url,
-  //   });
-
-  //   res.status(200).json({
-  //     access_token: accessToken,
-  //     github_user_data: githubUserData,
-  //   });
-  // } else {
-  //   res.status(403).json({
-  //     message: 'Invalid code',
-  //   });
-  // }
 });
 
 router.get('/getUserData', async function (req, res) {

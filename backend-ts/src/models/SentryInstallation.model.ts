@@ -1,7 +1,5 @@
 import {Column, ForeignKey, Model, Table} from 'sequelize-typescript';
 
-import Organization from './Organization.model';
-
 @Table({tableName: 'sentry_installation', underscored: true, timestamps: false})
 export default class SentryInstallation extends Model {
   @Column
@@ -18,10 +16,4 @@ export default class SentryInstallation extends Model {
 
   @Column
   expiresAt: Date;
-
-  // Delete the below fields
-
-  @ForeignKey(() => Organization)
-  @Column
-  organizationId: number;
 }

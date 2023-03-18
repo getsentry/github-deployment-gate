@@ -1,3 +1,4 @@
--- Truncating the 'organization' table with CASCADE will also truncate 'item', 'user' and 'sentry_installation' tables.
-
-TRUNCATE organization CASCADE;
+TRUNCATE sentry_installation;
+TRUNCATE deployment_protection_rule_request;
+TRUNCATE github_repo;
+TRUNCATE public."user";
