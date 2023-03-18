@@ -1,6 +1,8 @@
 import express from 'express';
 
 import loginRoutes from './login';
+import setupRoutes from './setup';
+import webhookRoutes from './webhook';
 import GithubRepo from '../../models/GithubRepo.model';
 import SentryInstallation from '../../models/SentryInstallation.model';
 import User from '../../models/User.model';
@@ -9,6 +11,8 @@ import SentryAPIClient from '../../util/SentryAPIClient';
 const router = express.Router();
 
 router.use('/login', loginRoutes);
+router.use('/setup', setupRoutes);
+router.use('/webhook', webhookRoutes);
 
 router.get('/githubRepo', async function (req, res) {
   console.log(req.get('Authorization'));
@@ -108,6 +112,7 @@ async function getGithubRepos(userId: string) {
   const repos = await GithubRepo.findAll({
     where: {
       userId: userId,
+      isActive: true,
     },
   });
   return repos;

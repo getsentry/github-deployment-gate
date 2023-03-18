@@ -149,21 +149,30 @@ function Home() {
             <React.Fragment>
               <React.Fragment>
                 <h2>Welcome {githubHandle}!</h2>
-                {!isFetchRepoAPILoading && (!repos || repos.length == 0) ? (
-                  <>
-                    <p>
-                      You have not installed our Github app SentryDeploymentGate on any of
-                      your Github Repo yet. Please install Github App SentryDeploymentGate
-                      via this link:{' '}
-                      <a
-                        href="https://github.com/apps/sentrydeploymentgate"
-                        target="_blank"
-                        rel="noreferrer"
-                      >
-                        https://github.com/apps/sentrydeploymentgate
-                      </a>
-                    </p>
-                  </>
+                {!isFetchRepoAPILoading ? (
+                  !repos || repos.length == 0 ? (
+                    <>
+                      <p>
+                        You have not installed our Github app SentryDeploymentGate on any
+                        of your Github Repo yet. Please install Github App
+                        SentryDeploymentGate via this link:{' '}
+                        <a
+                          href="https://github.com/apps/sentrydeploymentgate"
+                          target="_blank"
+                          rel="noreferrer"
+                        >
+                          https://github.com/apps/sentrydeploymentgate
+                        </a>
+                      </p>
+                    </>
+                  ) : (
+                    <div style={{marginBottom: '2rem'}}>
+                      Github Repos:
+                      {repos.map(s => {
+                        return <div key={s.name}>{s.name}</div>;
+                      })}
+                    </div>
+                  )
                 ) : (
                   <></>
                 )}
@@ -179,13 +188,47 @@ function Home() {
                       </p>
                     </>
                   ) : (
-                    <div>
+                    <div style={{marginBottom: '2rem'}}>
                       Sentry Projects:
                       {sentryInstallation.projectSlugs.map(s => {
                         return <div key={s}>{s}</div>;
                       })}
                     </div>
                   )
+                ) : (
+                  <></>
+                )}
+                {!isFetchRepoAPILoading &&
+                !isFetchSentryInstallationAPILoading &&
+                repos &&
+                repos.length > 0 &&
+                sentryInstallation &&
+                sentryInstallation.projectSlugs &&
+                sentryInstallation.projectSlugs.length > 0 ? (
+                  <div>
+                    {repos?.map(repo => {
+                      return (
+                        <div>
+                          <div>{repo.name}</div>
+                          <div>
+                            Select Sentry Project:
+                            <StyledSelect
+                              options={sentryInstallation.projectSlugs?.map(s => ({
+                                value: `${s}`,
+                                label: s,
+                              }))}
+                              placeholder="Select a sentry project..."
+                            />{' '}
+                          </div>
+                          <div>
+                            Wait Time (in seconds)
+                            <input type="number" id="wait-time"></input>
+                          </div>
+                        </div>
+                      );
+                    })}
+                    <div></div>
+                  </div>
                 ) : (
                   <></>
                 )}
@@ -241,5 +284,12 @@ const Main = styled.main`
     margin: 0 auto;
   }
 `;
-
+const StyledSelect = styled(ThemedSelect)`
+  flex: 1;
+  margin: 1rem;
+  font-size: ${p => p.theme.text.baseSize};
+  * {
+    white-space: normal !important;
+  }
+`;
 export default Home;

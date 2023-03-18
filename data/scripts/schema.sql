@@ -16,6 +16,7 @@ SET xmloption = content;
 SET client_min_messages = warning;
 SET row_security = off;
 
+<<<<<<< HEAD
 --
 -- Name: enum_item_column; Type: TYPE; Schema: public; Owner: admin
 --
@@ -54,11 +55,16 @@ CREATE TYPE public.itemcolumn AS ENUM (
 
 ALTER TYPE public.itemcolumn OWNER TO admin;
 
+=======
+
+
+>>>>>>> feature/sentry-integration
 SET default_tablespace = '';
 
 SET default_table_access_method = heap;
 
 --
+<<<<<<< HEAD
 -- Name: item; Type: TABLE; Schema: public; Owner: admin
 --
 
@@ -138,6 +144,8 @@ ALTER SEQUENCE public.organization_id_seq OWNED BY public.organization.id;
 
 
 --
+=======
+>>>>>>> feature/sentry-integration
 -- Name: sentry_installation; Type: TABLE; Schema: public; Owner: admin
 --
 
@@ -148,7 +156,10 @@ CREATE TABLE public.sentry_installation (
     token character varying(255),
     refresh_token character varying(255),
     expires_at timestamp with time zone,
+<<<<<<< HEAD
     organization_id integer
+=======
+>>>>>>> feature/sentry-integration
 );
 
 
@@ -186,6 +197,10 @@ CREATE TABLE public.github_repo (
     wait_period_to_check_for_issue integer,
     sentry_installation_id integer,
     user_id integer,
+<<<<<<< HEAD
+=======
+    is_active boolean;
+>>>>>>> feature/sentry-integration
 );
 
 
@@ -291,6 +306,7 @@ ALTER SEQUENCE public.user_id_seq OWNED BY public."user".id;
 
 
 --
+<<<<<<< HEAD
 -- Name: item id; Type: DEFAULT; Schema: public; Owner: admin
 --
 
@@ -305,6 +321,8 @@ ALTER TABLE ONLY public.organization ALTER COLUMN id SET DEFAULT nextval('public
 
 
 --
+=======
+>>>>>>> feature/sentry-integration
 -- Name: sentry_installation id; Type: DEFAULT; Schema: public; Owner: admin
 --
 
@@ -332,6 +350,7 @@ ALTER TABLE ONLY public.deployment_protection_rule_request ALTER COLUMN id SET D
 
 
 --
+<<<<<<< HEAD
 -- Data for Name: item; Type: TABLE DATA; Schema: public; Owner: admin
 --
 
@@ -356,6 +375,8 @@ COPY public.organization (id, name, slug, external_slug) FROM stdin;
 
 
 --
+=======
+>>>>>>> feature/sentry-integration
 -- Data for Name: sentry_installation; Type: TABLE DATA; Schema: public; Owner: admin
 --
 
@@ -364,6 +385,7 @@ COPY public.sentry_installation (id, uuid, org_slug, token, refresh_token, expir
 
 
 --
+<<<<<<< HEAD
 -- Data for Name: user; Type: TABLE DATA; Schema: public; Owner: admin
 --
 
@@ -390,6 +412,8 @@ SELECT pg_catalog.setval('public.organization_id_seq', 1, true);
 
 
 --
+=======
+>>>>>>> feature/sentry-integration
 -- Name: sentry_installation_id_seq; Type: SEQUENCE SET; Schema: public; Owner: admin
 --
 
@@ -416,6 +440,7 @@ SELECT pg_catalog.setval('public.user_id_seq', 4, true);
 
 
 --
+<<<<<<< HEAD
 -- Name: item item_pkey; Type: CONSTRAINT; Schema: public; Owner: admin
 --
 
@@ -431,6 +456,8 @@ ALTER TABLE ONLY public.organization
     ADD CONSTRAINT organization_pkey PRIMARY KEY (id);
 
 --
+=======
+>>>>>>> feature/sentry-integration
 -- Name: github_repo github_repo_pkey; Type: CONSTRAINT; Schema: public; Owner: admin
 --
 
@@ -462,6 +489,7 @@ ALTER TABLE ONLY public."user"
 
 
 --
+<<<<<<< HEAD
 -- Name: item item_assignee_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: admin
 --
 
@@ -470,6 +498,8 @@ ALTER TABLE ONLY public.item
 
 
 --
+=======
+>>>>>>> feature/sentry-integration
 -- Name: deployment_protection_rule_request deployment_protection_rule_request_github_repo_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: admin
 --
 
@@ -502,6 +532,7 @@ ALTER TABLE ONLY public."user"
 
 
 --
+<<<<<<< HEAD
 -- Name: item item_organization_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: admin
 --
 
@@ -526,5 +557,7 @@ ALTER TABLE ONLY public."user"
 
 
 --
+=======
+>>>>>>> feature/sentry-integration
 -- PostgreSQL database dump complete
 --

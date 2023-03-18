@@ -52,6 +52,7 @@ export const ISSUE = {
   lastSeen: '2022-04-04T18:17:18.320000Z',
 };
 
+<<<<<<< HEAD
 const EVENT = {
   event_id: 'def456',
   platform: ISSUE.platform,
@@ -128,6 +129,8 @@ const METRIC_ALERT_WITH_ALERT_RULE_ACTION = {
 
 const METRIC_ALERT_DESCRIPTION = '5 events in the last 10 minutes';
 
+=======
+>>>>>>> feature/sentry-integration
 export const MOCK_SETUP = {
   postInstall: {
     code: 'installCode',
@@ -154,6 +157,7 @@ const MOCK_INSTALLATION_DELETED_WEBHOOK = {
   installation: INSTALLATION,
 };
 
+<<<<<<< HEAD
 const MOCK_ISSUE_ASSIGNED_WEBHOOK = {
   action: 'assigned',
   data: {issue: ISSUE},
@@ -299,4 +303,9 @@ export const MOCK_ISSUE_LINK = {
 export const MOCK_ALERT_RULE_ACTION = {
   fields: ALERT_RULE_ACTION_SETTINGS,
   installationId: UUID,
+=======
+export const MOCK_WEBHOOK = {
+  'installation.deleted': MOCK_INSTALLATION_DELETED_WEBHOOK,
+  'installation.created': MOCK_INSTALLATION_CREATED_WEBHOOK,
+>>>>>>> feature/sentry-integration
 };
