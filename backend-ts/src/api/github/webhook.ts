@@ -17,11 +17,18 @@ router.post('/deploymentRule', async function (req, res) {
           const user = await User.findOne({
             where: {githubHandle: deploymentRule.installation.account.login},
           });
-          GithubRepo.create({
-            name: repo.full_name,
-            userId: user.id,
-            isActive: true,
+          const githubRepo = await GithubRepo.findOne({
+            where: {name: repo.full_name},
           });
+          if (!githubRepo) {
+            GithubRepo.create({
+              name: repo.full_name,
+              userId: user.id,
+              isActive: true,
+            });
+          } else {
+            githubRepo.update({isActive: true});
+          }
         }
       }
       break;

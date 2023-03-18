@@ -206,12 +206,43 @@ function Home() {
                 sentryInstallation.projectSlugs &&
                 sentryInstallation.projectSlugs.length > 0 ? (
                   <div>
+                    <div style={{display: 'flex'}}>
+                      <div
+                        style={{width: '25%', textAlign: 'center', fontWeight: 'bold'}}
+                      >
+                        Github Repo
+                      </div>
+                      <div
+                        style={{width: '25%', textAlign: 'center', fontWeight: 'bold'}}
+                      >
+                        Sentry Project
+                      </div>
+                      <div
+                        style={{width: '25%', textAlign: 'center', fontWeight: 'bold'}}
+                      >
+                        Wait Time (In Seconds)
+                      </div>
+                      <div
+                        style={{width: '25%', textAlign: 'center', fontWeight: 'bold'}}
+                      >
+                        Action
+                      </div>
+                    </div>
                     {repos?.map(repo => {
                       return (
-                        <div>
-                          <div>{repo.name}</div>
-                          <div>
-                            Select Sentry Project:
+                        <div style={{display: 'flex'}}>
+                          <div
+                            style={{
+                              width: '25%',
+                              textAlign: 'center',
+                              paddingTop: '1rem',
+                            }}
+                          >
+                            <label style={{fontSize: '20px', margin: '1rem'}}>
+                              {repo.name}
+                            </label>
+                          </div>
+                          <div style={{width: '25%', textAlign: 'center'}}>
                             <StyledSelect
                               options={sentryInstallation.projectSlugs?.map(s => ({
                                 value: `${s}`,
@@ -220,9 +251,27 @@ function Home() {
                               placeholder="Select a sentry project..."
                             />{' '}
                           </div>
-                          <div>
-                            Wait Time (in seconds)
-                            <input type="number" id="wait-time"></input>
+                          <div style={{width: '25%', textAlign: 'center'}}>
+                            <input
+                              style={{minHeight: '38px', margin: '1rem'}}
+                              type="number"
+                              id="wait-time"
+                            ></input>
+                          </div>
+                          <div
+                            style={{
+                              width: '25%',
+                              textAlign: 'center',
+                              display: 'flex',
+                              justifyContent: 'center',
+                            }}
+                          >
+                            <button
+                              style={{minHeight: '38px', margin: '1rem'}}
+                              id="update"
+                            >
+                              Update
+                            </button>
                           </div>
                         </div>
                       );
