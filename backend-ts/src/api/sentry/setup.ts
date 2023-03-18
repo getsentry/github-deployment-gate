@@ -24,9 +24,15 @@ const router = express.Router();
 
 router.post('/', async (req, res) => {
   console.log('Redirect URL - Setup');
-  console.log({req});
   // Destructure the all the body params we receive from the installation prompt
   const {code, installationId, sentryOrgSlug} = req.body;
+  if (!code || !installationId) {
+    res.status(403).json({
+      status: 'error',
+      message: 'Invalid code or installationId',
+    });
+    return;
+  }
 
   // Construct a payload to ask Sentry for a token on the basis that a user is installing
   const payload = {
@@ -46,6 +52,8 @@ router.post('/', async (req, res) => {
   //    - Make sure to associate the installationId and the tokenData since it's unique to the organization
   //    - Using the wrong token for the a different installation will result 401 Unauthorized responses
   const {token, refreshToken, expiresAt} = tokenResponse.data;
+  console.log('Creating SentryInstallation');
+  console.log(installationId, sentryOrgSlug, expiresAt, token, refreshToken);
   await SentryInstallation.create({
     uuid: installationId as string,
     orgSlug: sentryOrgSlug as string,
@@ -53,6 +61,7 @@ router.post('/', async (req, res) => {
     token,
     refreshToken,
   });
+  console.log('Created SentryInstallation');
 
   // Verify the installation to inform Sentry of the success
   //    - This step is only required if you have enabled 'Verify Installation' on your integration
@@ -72,6 +81,7 @@ router.post('/', async (req, res) => {
   // - Once you're done, you can optionally redirect the user back to Sentry as we do below
   console.info(`Installed ${verifyResponse.data.app.slug}'`);
   res.status(201).send({
+    status: 'success',
     redirectUrl: `${process.env.SENTRY_URL}/settings/${sentryOrgSlug}/sentry-apps/${verifyResponse.data.app.slug}/`,
   });
 });

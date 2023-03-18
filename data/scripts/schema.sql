@@ -260,6 +260,7 @@ CREATE TABLE public."user" (
     github_handle character varying(255),
     refresh_token character varying(255),
     username character varying(255),
+    sentry_installation_id integer,
     avatar character varying(255),
     organization_id integer
 );
@@ -491,6 +492,13 @@ ALTER TABLE ONLY public.github_repo
 ALTER TABLE ONLY public.github_repo
     ADD CONSTRAINT github_repo_sentry_installation_id_fkey FOREIGN KEY (sentry_installation_id) REFERENCES public.sentry_installation(id) ON UPDATE CASCADE ON DELETE CASCADE;
 
+
+--
+-- Name: github_repo github_repo_sentry_installation_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: admin
+--
+
+ALTER TABLE ONLY public."user"
+    ADD CONSTRAINT user_sentry_installation_id_fkey FOREIGN KEY (sentry_installation_id) REFERENCES public.sentry_installation(id) ON UPDATE CASCADE ON DELETE CASCADE;
 
 
 --

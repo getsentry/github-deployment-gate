@@ -15,10 +15,37 @@ import {makeBackendRequest} from '../util';
 
 const REDIRECT_TIMEOUT = 3 * 1000;
 
+interface GithubRepo {
+  id: number;
+  name: string;
+  sentryProjectSlug: string;
+  waitPeriodToCheckForIssue: number;
+  sentryInstallationId: number;
+  userId: number;
+}
+
+interface SentryInstallation {
+  id: number;
+  uuid: string;
+  orgSlug: string;
+  token: string;
+  refreshToken: string;
+  expiresAt: Date;
+  projectSlugs: Array<string>;
+}
+
 function Home() {
   const [redirect, setRedirect] = useState('');
   const [rerender, setRerender] = useState(false);
-  const [githubHandle, setGithubHandle] = useState('');
+  const [githubHandle, setGithubHandle] = useState(
+    localStorage.getItem(GITHUB_HANDLE) ? localStorage.getItem(GITHUB_HANDLE) : ''
+  );
+  const [repos, setRepos] = useState<Array<GithubRepo>>();
+  const [isFetchRepoAPILoading, setIsFetchRepoAPILoading] = useState(true);
+
+  const [sentryInstallation, setSentryInstallation] = useState<SentryInstallation>();
+  const [isFetchSentryInstallationAPILoading, setIsFetchSentryInstallationAPILoading] =
+    useState(true);
 
   async function getUserData() {
     const response = await makeBackendRequest(
@@ -36,9 +63,45 @@ function Home() {
   }
 
   useEffect(() => {
+    async function fetchGithubRepos(githubHandle: string) {
+      const response = await makeBackendRequest(
+        `/api/github/githubRepo?githubHandle=${githubHandle}`,
+        undefined,
+        {
+          method: 'GET',
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem(ACCESS_TOKEN)}`,
+          },
+        }
+      );
+      setIsFetchRepoAPILoading(false);
+      if (response && response.data) {
+        setRepos(response.data);
+      }
+    }
+    async function fetchSentryInstallation(githubHandle: string) {
+      const response = await makeBackendRequest(
+        `/api/github/sentryInstallation?githubHandle=${githubHandle}`,
+        undefined,
+        {
+          method: 'GET',
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem(ACCESS_TOKEN)}`,
+          },
+        }
+      );
+      if (response && response.data) {
+        setSentryInstallation(response.data);
+      }
+      setIsFetchSentryInstallationAPILoading(false);
+    }
     async function getAccessToken(code: string) {
       const response = await makeBackendRequest(
-        `/api/github/login/getAccessToken?code=${code}`,
+        `/api/github/login/getAccessToken?code=${code}&sentryInstallationId=${
+          localStorage.getItem(SENTRY_INSTALLATION_ID)
+            ? localStorage.getItem(SENTRY_INSTALLATION_ID)
+            : 'null'
+        }`,
         undefined,
         {
           method: 'GET',
@@ -57,11 +120,23 @@ function Home() {
       }
       return response.access_token;
     }
-    const codeParam = searchParams.get('code');
-    console.log(codeParam);
-    if (codeParam && localStorage.getItem(ACCESS_TOKEN) === null) {
-      getAccessToken(codeParam);
+    async function process() {
+      const codeParam = searchParams.get('code');
+      console.log(codeParam);
+      if (codeParam) {
+        getAccessToken(codeParam);
+      } else {
+        if (!localStorage.getItem(ACCESS_TOKEN) || !localStorage.getItem(GITHUB_HANDLE)) {
+          window.location.assign('/login');
+        }
+      }
+      const githubHandle = localStorage.getItem(GITHUB_HANDLE);
+      if (githubHandle) {
+        fetchGithubRepos(githubHandle);
+        fetchSentryInstallation(githubHandle);
+      }
     }
+    process();
   }, []);
 
   const [searchParams] = useSearchParams();
@@ -74,7 +149,46 @@ function Home() {
             <React.Fragment>
               <React.Fragment>
                 <h2>Welcome {githubHandle}!</h2>
-                <p></p>
+                {!isFetchRepoAPILoading && (!repos || repos.length == 0) ? (
+                  <>
+                    <p>
+                      You have not installed our Github app SentryDeploymentGate on any of
+                      your Github Repo yet. Please install Github App SentryDeploymentGate
+                      via this link:{' '}
+                      <a
+                        href="https://github.com/apps/sentrydeploymentgate"
+                        target="_blank"
+                        rel="noreferrer"
+                      >
+                        https://github.com/apps/sentrydeploymentgate
+                      </a>
+                    </p>
+                  </>
+                ) : (
+                  <></>
+                )}
+                {!isFetchSentryInstallationAPILoading ? (
+                  !sentryInstallation ? (
+                    <>
+                      <p>
+                        You have not installed our Sentry integration yet. Please install
+                        our public Sentry integration named TestSentryApp. For
+                        installation, you need to login to your sentry dashboard, go to
+                        settings and click on Integrations. Search for `TestSentryApp` in
+                        public section.
+                      </p>
+                    </>
+                  ) : (
+                    <div>
+                      Sentry Projects:
+                      {sentryInstallation.projectSlugs.map(s => {
+                        return <div key={s}>{s}</div>;
+                      })}
+                    </div>
+                  )
+                ) : (
+                  <></>
+                )}
               </React.Fragment>
               <h1></h1>
             </React.Fragment>
