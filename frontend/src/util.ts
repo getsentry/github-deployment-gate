@@ -7,6 +7,7 @@ export async function makeBackendRequest(
 ) {
   const baseEndpoint = process.env.REACT_APP_BACKEND_URL;
   console.log(baseEndpoint);
+  console.log(options);
   const res = await fetch(`${baseEndpoint}${path}`, {
     mode: 'cors',
     headers: {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
