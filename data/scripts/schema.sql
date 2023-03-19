@@ -105,6 +105,8 @@ ALTER SEQUENCE public.github_repo_id_seq OWNED BY public.github_repo.id;
 CREATE TABLE public.deployment_protection_rule_request (
     id integer NOT NULL,
     status character varying(255),
+    installation_id integer,
+    deployment_callback_url character varying(512),
     created_at datetime,
     github_repo_id integer,
 );

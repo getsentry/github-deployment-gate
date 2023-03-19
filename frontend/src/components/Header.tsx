@@ -5,7 +5,7 @@ import ErrorForm from './ErrorForm';
 
 const Header = () => (
   <StyledHeader>
-    <Title>🚀 ACME Kanban</Title>
+    <Title>🚀 Github Deployment Gate</Title>
     <ErrorForm />
   </StyledHeader>
 );

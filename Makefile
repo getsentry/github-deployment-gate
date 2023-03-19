@@ -1,7 +1,7 @@
 .DEFAULT_GOAL := help
 
 help:
-	@echo 'Welcome to the Integration Platform Example a.k.a. ACME Kanban 🚀!'
+	@echo 'Welcome to the Github Deployment Gate 🚀!'
 	@echo
 	@echo '>>> Quickstart'
 	@echo 'make serve-typescript    -> Start the typescript backend + frontend'

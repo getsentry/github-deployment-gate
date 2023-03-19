@@ -10,6 +10,12 @@ export default class DeploymentProtectionRuleRequest extends Model {
   @Column
   status: string;
 
+  @Column
+  installationId: number;
+
+  @Column
+  deploymentCallbackUrl: string;
+
   @ForeignKey(() => GithubRepo)
   @Column
   githubRepoId: number;

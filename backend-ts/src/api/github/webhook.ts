@@ -1,7 +1,12 @@
 import express from 'express';
 import GithubRepo from '../../models/GithubRepo.model';
-import {DeploymentRuleAction, DeploymentRuleDTO} from '../../dto/DeploymentRule.dto';
+import {
+  DeploymentProtectionRuleStatus,
+  DeploymentRuleAction,
+  DeploymentRuleDTO,
+} from '../../dto/DeploymentRule.dto';
 import User from '../../models/User.model';
+import DeploymentProtectionRuleRequest from '../../models/DeploymentProtectionRuleRequest.model';
 
 const router = express.Router();
 
@@ -23,6 +28,7 @@ router.post('/deploymentRule', async function (req, res) {
           if (!githubRepo) {
             GithubRepo.create({
               name: repo.full_name,
+              waitPeriodToCheckForIssue: 900,
               userId: user.id,
               isActive: true,
             });
@@ -36,9 +42,6 @@ router.post('/deploymentRule', async function (req, res) {
       if (deploymentRule.repositories_removed) {
         for (let i = 0; i < deploymentRule.repositories_removed.length; i++) {
           const repo = deploymentRule.repositories_removed[i];
-          const user = await User.findOne({
-            where: {githubHandle: deploymentRule.installation.account.login},
-          });
           const githubRepo = await GithubRepo.findOne({
             where: {name: repo.full_name},
           });
@@ -51,6 +54,17 @@ router.post('/deploymentRule', async function (req, res) {
       }
       break;
     case DeploymentRuleAction.REQUESTED:
+      if (deploymentRule.repository && deploymentRule.repository.full_name) {
+        const githubRepo = await GithubRepo.findOne({
+          where: {name: deploymentRule.repository.full_name},
+        });
+        DeploymentProtectionRuleRequest.create({
+          status: DeploymentProtectionRuleStatus.REQUESTED,
+          githubRepoId: githubRepo.id,
+          installationId: deploymentRule.installation.id,
+          deploymentCallbackUrl: deploymentRule.deployment_callback_url,
+        });
+      }
       break;
   }
   res.json({

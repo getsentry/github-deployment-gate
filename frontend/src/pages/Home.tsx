@@ -11,28 +11,10 @@ import {
   SENTRY_INSTALLATION_ID,
   SENTRY_ORG_SLUG,
 } from '../constants/browserStorage';
+import {GithubRepo, SentryInstallation} from '../types';
 import {makeBackendRequest} from '../util';
 
 const REDIRECT_TIMEOUT = 3 * 1000;
-
-interface GithubRepo {
-  id: number;
-  name: string;
-  sentryProjectSlug: string;
-  waitPeriodToCheckForIssue: number;
-  sentryInstallationId: number;
-  userId: number;
-}
-
-interface SentryInstallation {
-  id: number;
-  uuid: string;
-  orgSlug: string;
-  token: string;
-  refreshToken: string;
-  expiresAt: Date;
-  projectSlugs: Array<string>;
-}
 
 function Home() {
   const [redirect, setRedirect] = useState('');
@@ -46,21 +28,6 @@ function Home() {
   const [sentryInstallation, setSentryInstallation] = useState<SentryInstallation>();
   const [isFetchSentryInstallationAPILoading, setIsFetchSentryInstallationAPILoading] =
     useState(true);
-
-  async function getUserData() {
-    const response = await makeBackendRequest(
-      `/api/github/login/getUserData`,
-      undefined,
-      {
-        method: 'GET',
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem(ACCESS_TOKEN)}`,
-        },
-      }
-    );
-    console.log(response);
-    return response;
-  }
 
   useEffect(() => {
     async function fetchGithubRepos(githubHandle: string) {
@@ -256,6 +223,7 @@ function Home() {
                               style={{minHeight: '38px', margin: '1rem'}}
                               type="number"
                               id="wait-time"
+                              value={repo.waitPeriodToCheckForIssue}
                             ></input>
                           </div>
                           <div
@@ -301,13 +269,6 @@ export const SentryApplicationLogo = styled(SentryLogo)`
   padding: 1rem;
   border-radius: 1rem;
 `;
-
-const PreInstallTextBlock = () => (
-  <React.Fragment>
-    <h2>Welcome !</h2>
-    <p></p>
-  </React.Fragment>
-);
 
 const Main = styled.main`
   background: ${p => p.theme.gray100};

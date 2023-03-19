@@ -7,6 +7,7 @@ import GithubRepo from '../../models/GithubRepo.model';
 import SentryInstallation from '../../models/SentryInstallation.model';
 import User from '../../models/User.model';
 import SentryAPIClient from '../../util/SentryAPIClient';
+import {generateGHAppJWT, getGithubAccessToken} from '../../util/token.helpers';
 
 const router = express.Router();
 
@@ -98,7 +99,19 @@ router.get('/sentryInstallation', async function (req, res) {
     },
   });
 });
-``;
+
+router.get('/generate', async function (req, res) {
+  console.log(req.get('generate'));
+  const token = await generateGHAppJWT();
+  // const token = await getGithubAccessToken();
+  res.status(200).json({
+    status: 'success',
+    data: {
+      token: token,
+    },
+  });
+});
+
 async function getUserByGHHandle(githubHandle: string) {
   const user = await User.findOne({
     where: {
