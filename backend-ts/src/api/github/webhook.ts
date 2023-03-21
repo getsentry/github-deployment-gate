@@ -38,10 +38,48 @@ router.post('/deploymentRule', async function (req, res) {
         }
       }
       break;
+    case DeploymentRuleAction.CREATED:
+      if (deploymentRule.repositories) {
+        for (let i = 0; i < deploymentRule.repositories.length; i++) {
+          const repo = deploymentRule.repositories[i];
+          const user = await User.findOne({
+            where: {githubHandle: deploymentRule.installation.account.login},
+          });
+          const githubRepo = await GithubRepo.findOne({
+            where: {name: repo.full_name},
+          });
+          if (!githubRepo) {
+            GithubRepo.create({
+              name: repo.full_name,
+              waitPeriodToCheckForIssue: 900,
+              userId: user.id,
+              isActive: true,
+            });
+          } else {
+            githubRepo.update({isActive: true});
+          }
+        }
+      }
+      break;
     case DeploymentRuleAction.REMOVED:
       if (deploymentRule.repositories_removed) {
         for (let i = 0; i < deploymentRule.repositories_removed.length; i++) {
           const repo = deploymentRule.repositories_removed[i];
+          const githubRepo = await GithubRepo.findOne({
+            where: {name: repo.full_name},
+          });
+          if (githubRepo) {
+            githubRepo.update({
+              isActive: false,
+            });
+          }
+        }
+      }
+      break;
+    case DeploymentRuleAction.DELETED:
+      if (deploymentRule.repositories) {
+        for (let i = 0; i < deploymentRule.repositories.length; i++) {
+          const repo = deploymentRule.repositories[i];
           const githubRepo = await GithubRepo.findOne({
             where: {name: repo.full_name},
           });

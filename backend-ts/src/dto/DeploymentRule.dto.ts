@@ -16,6 +16,9 @@ export class DeploymentRuleDTO {
       login: string;
     };
   };
+  repositories: Array<{
+    full_name: string;
+  }>;
   repositories_removed: Array<{
     full_name: string;
   }>;
@@ -36,7 +39,9 @@ export class DeploymentRuleDTO {
 
 export enum DeploymentRuleAction {
   ADDED = 'added',
+  CREATED = 'created',
   REMOVED = 'removed',
+  DELETED = 'deleted',
   REQUESTED = 'requested',
 }
 
