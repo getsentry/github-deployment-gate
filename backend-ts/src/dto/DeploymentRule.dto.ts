@@ -8,6 +8,7 @@ export class DeploymentRuleDTO {
     node_id: string;
     task: string;
     environment: string;
+    sha: string;
   };
   installation: {
     id: number;
@@ -23,6 +24,10 @@ export class DeploymentRuleDTO {
   }>;
   repository: {
     full_name: string;
+    owner: {
+      login: string;
+      avatar_url: string;
+    };
   };
   sender: {
     login: string;

@@ -55,14 +55,40 @@ router.post('/deploymentRule', async function (req, res) {
       break;
     case DeploymentRuleAction.REQUESTED:
       if (deploymentRule.repository && deploymentRule.repository.full_name) {
-        const githubRepo = await GithubRepo.findOne({
+        let githubRepo = await GithubRepo.findOne({
           where: {name: deploymentRule.repository.full_name},
         });
+        // If a request came, the repo for which never added to our system. This may only happen due to some glitch.
+        if (!githubRepo) {
+          // Find if the owner of the repo is existing user of the system, if not create a user for the owner
+          let owner = await User.findOne({
+            where: {
+              githubHandle: deploymentRule.repository.owner.login,
+            },
+          });
+          if (!owner) {
+            owner = await User.create({
+              name: deploymentRule.repository.owner.login,
+              githubHandle: deploymentRule.repository.owner.login,
+              avatar: deploymentRule.repository.owner.avatar_url,
+            });
+          }
+
+          // create entry for github repo
+          githubRepo = await GithubRepo.create({
+            name: deploymentRule.repository.full_name,
+            waitPeriodToCheckForIssue: 900,
+            userId: owner.id,
+            isActive: true,
+          });
+        }
+
         DeploymentProtectionRuleRequest.create({
           status: DeploymentProtectionRuleStatus.REQUESTED,
           githubRepoId: githubRepo.id,
           installationId: deploymentRule.installation.id,
           deploymentCallbackUrl: deploymentRule.deployment_callback_url,
+          sha: deploymentRule.deployment.sha,
         });
       }
       break;
