@@ -1,3 +1,4 @@
+import axios from 'axios';
 import express from 'express';
 
 import loginRoutes from './login';
@@ -7,7 +8,12 @@ import GithubRepo from '../../models/GithubRepo.model';
 import SentryInstallation from '../../models/SentryInstallation.model';
 import User from '../../models/User.model';
 import SentryAPIClient from '../../util/SentryAPIClient';
-import {generateGHAppJWT, getGithubAccessToken} from '../../util/token.helpers';
+import {generateGHAppJWT} from '../../util/token.helpers';
+import DeploymentProtectionRuleRequest from '../../models/DeploymentProtectionRuleRequest.model';
+import {
+  DeploymentProtectionRuleStatus,
+  RespondToGithubProtectionRuleDTO,
+} from '../../dto/DeploymentRule.dto';
 
 const router = express.Router();
 
@@ -129,6 +135,48 @@ async function getGithubRepos(userId: string) {
     },
   });
   return repos;
+}
+
+export async function getGithubInstallationAccessToken(
+  installationId: number,
+  accessToken: string
+) {
+  const response = await axios.post(
+    `https://api.github.com/app/installations/${installationId}/access_tokens`,
+    undefined,
+    {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+        Accept: 'application/vnd.github+json',
+        'Content-Type': 'application/json',
+      },
+    }
+  );
+  if (response && response.data) {
+    return response.data.token;
+  }
+  return null;
+}
+
+export async function respondToDeploymentProtectionRule(
+  deploymentCallbackUrl: string,
+  installationAccessToken: string,
+  respondToGithubProtectionRuleDTO: RespondToGithubProtectionRuleDTO
+) {
+  const response = await axios.post(
+    deploymentCallbackUrl,
+    respondToGithubProtectionRuleDTO,
+    {
+      headers: {
+        Authorization: `Bearer ${installationAccessToken}`,
+        Accept: 'application/vnd.github+json',
+      },
+    }
+  );
+  console.log('response', response);
+  console.log('response.data', response.data);
+  console.log('response.status', response.status);
+  return response;
 }
 
 export default router;

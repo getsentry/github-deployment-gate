@@ -1,7 +1,20 @@
 import axios from 'axios';
 import express from 'express';
+import SentryAPIClient from '../../util/SentryAPIClient';
+import {
+  DeploymentProtectionRuleStatus,
+  SentyReleaseResponseDTO,
+} from '../../dto/DeploymentRule.dto';
+import DeploymentProtectionRuleRequest from '../../models/DeploymentProtectionRuleRequest.model';
 
 import SentryInstallation from '../../models/SentryInstallation.model';
+import GithubRepo from '../../models/GithubRepo.model';
+import User from '../../models/User.model';
+import {generateGHAppJWT, getGithubAccessToken} from '../../util/token.helpers';
+import {
+  getGithubInstallationAccessToken,
+  respondToDeploymentProtectionRule,
+} from '../github';
 
 export type TokenResponseData = {
   expiresAt: string; // ISO date string at which token must be refreshed
@@ -85,5 +98,105 @@ router.post('/', async (req, res) => {
     redirectUrl: `${process.env.SENTRY_URL}/settings/${sentryOrgSlug}/sentry-apps/${verifyResponse.data.app.slug}/`,
   });
 });
+
+router.post('/process', async (req, res) => {
+  console.log('process');
+  processDeploymentRules();
+});
+
+export async function processDeploymentRules() {
+  // Find all deployment protection rules request which are in requested state
+  const requests = await DeploymentProtectionRuleRequest.findAll({
+    where: {
+      status: DeploymentProtectionRuleStatus.REQUESTED,
+    },
+  });
+
+  requests.map(request => {
+    // If request created time is more than wait time ago, then call GH api with approved status
+    // Else call the method to find for new issues for a particular release and call GH api with rejected status
+    checkForNewIssue(
+      request.sha,
+      request.githubRepoId,
+      request.installationId,
+      request.deploymentCallbackUrl
+    );
+  });
+}
+
+export async function checkForNewIssue(
+  releaseId: string,
+  githubRepoId: number,
+  installationId: number,
+  deploymentCallbackUrl: string
+) {
+  console.log('checkForNewIssue');
+  const githubRepo = await GithubRepo.findOne({
+    where: {
+      id: githubRepoId,
+    },
+  });
+  console.log('githubRepo', githubRepo);
+  if (githubRepo) {
+    const user = await User.findOne({
+      where: {
+        id: githubRepo.userId,
+      },
+    });
+    console.log('user', user);
+    if (user && user.sentryInstallationId) {
+      const sentryInstallation = await SentryInstallation.findOne({
+        where: {
+          id: user.sentryInstallationId,
+        },
+      });
+      console.log('sentryInstallation', sentryInstallation);
+      if (sentryInstallation) {
+        const sentry = await SentryAPIClient.create(sentryInstallation.uuid);
+        const response = await sentry.get(
+          `/organizations/${sentryInstallation.orgSlug}/releases/${releaseId}/`
+        );
+        if (response) {
+          const sentryReleaseResponse: SentyReleaseResponseDTO = response.data;
+          console.log({sentryReleaseResponse});
+          console.log('sentryReleaseResponse.newGroups', sentryReleaseResponse.newGroups);
+          if (sentryReleaseResponse && sentryReleaseResponse.newGroups) {
+            // Call GH api with rejected response
+            const jwtToken = await generateGHAppJWT();
+            const installationToken = await getGithubInstallationAccessToken(
+              installationId,
+              jwtToken
+            );
+            console.log('installationToken', installationToken);
+            if (installationToken) {
+              const apiResponse = await respondToDeploymentProtectionRule(
+                deploymentCallbackUrl,
+                installationToken,
+                {
+                  state: DeploymentProtectionRuleStatus.REJECTED,
+                  comment: 'Found new issues in Sentry ',
+                  // environment_name: 'production',
+                }
+              );
+              if (apiResponse && apiResponse.status == 204) {
+                const deploymentProtectionRuleRequest =
+                  await DeploymentProtectionRuleRequest.findOne({
+                    where: {
+                      deploymentCallbackUrl: deploymentCallbackUrl,
+                    },
+                  });
+                if (deploymentProtectionRuleRequest) {
+                  deploymentProtectionRuleRequest.update({
+                    status: DeploymentProtectionRuleStatus.APPROVED,
+                  });
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
 
 export default router;

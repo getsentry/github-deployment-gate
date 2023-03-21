@@ -50,3 +50,22 @@ export enum DeploymentProtectionRuleStatus {
   REJECTED = 'rejected',
   REQUESTED = 'requested',
 }
+
+export class SentyReleaseResponseDTO {
+  id: number;
+  version: string;
+  status: string;
+  versionInfo: {
+    package: string;
+    version: {
+      raw: string;
+    };
+  };
+  newGroups: number;
+}
+
+export class RespondToGithubProtectionRuleDTO {
+  state: string;
+  comment: string;
+  environment_name?: string;
+}

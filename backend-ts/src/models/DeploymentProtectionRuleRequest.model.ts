@@ -1,4 +1,5 @@
 import {Column, ForeignKey, Model, Table} from 'sequelize-typescript';
+import {DeploymentProtectionRuleStatus} from '../dto/DeploymentRule.dto';
 import GithubRepo from './GithubRepo.model';
 
 @Table({
@@ -8,7 +9,7 @@ import GithubRepo from './GithubRepo.model';
 })
 export default class DeploymentProtectionRuleRequest extends Model {
   @Column
-  status: string;
+  status: DeploymentProtectionRuleStatus;
 
   @Column
   installationId: number;
