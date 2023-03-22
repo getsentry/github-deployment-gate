@@ -125,8 +125,10 @@ router.post('/deploymentRule', async function (req, res) {
           status: DeploymentProtectionRuleStatus.REQUESTED,
           githubRepoId: githubRepo.id,
           installationId: deploymentRule.installation.id,
+          environment: deploymentRule.environment,
           deploymentCallbackUrl: deploymentRule.deployment_callback_url,
           sha: deploymentRule.deployment.sha,
+          createdAt: new Date(),
         });
       }
       break;

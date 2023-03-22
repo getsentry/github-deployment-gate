@@ -91,19 +91,25 @@ router.get('/sentryInstallation', async function (req, res) {
     sentryData = await sentry.get(
       `/organizations/${sentryInstallation.orgSlug}/projects/`
     );
+    res.status(200).json({
+      status: 'success',
+      data: {
+        id: sentryInstallation.id,
+        uuid: sentryInstallation.uuid,
+        orgSlug: sentryInstallation.orgSlug,
+        token: sentryInstallation.token,
+        expiresAt: sentryInstallation.expiresAt,
+        projectSlugs: sentryData
+          ? sentryData.data.map((s: {slug: string}) => s.slug)
+          : [],
+      },
+    });
+  } else {
+    res.status(200).json({
+      status: 'success',
+      data: null,
+    });
   }
-
-  res.status(200).json({
-    status: 'success',
-    data: {
-      id: sentryInstallation.id,
-      uuid: sentryInstallation.uuid,
-      orgSlug: sentryInstallation.orgSlug,
-      token: sentryInstallation.token,
-      expiresAt: sentryInstallation.expiresAt,
-      projectSlugs: sentryData ? sentryData.data.map((s: {slug: string}) => s.slug) : [],
-    },
-  });
 });
 
 router.get('/generate', async function (req, res) {

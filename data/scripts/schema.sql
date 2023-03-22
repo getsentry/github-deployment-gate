@@ -106,9 +106,10 @@ CREATE TABLE public.deployment_protection_rule_request (
     id integer NOT NULL,
     status character varying(255),
     installation_id integer,
+    environment character varying(255),
     deployment_callback_url character varying(512),
     sha character varying(512),
-    created_at datetime,
+    created_at timestamp with time zone,
     github_repo_id integer,
 );
 

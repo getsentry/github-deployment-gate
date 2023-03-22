@@ -102,6 +102,9 @@ router.post('/', async (req, res) => {
 router.post('/process', async (req, res) => {
   console.log('process');
   processDeploymentRules();
+  res.status(200).json({
+    status: 'success',
+  });
 });
 
 export async function processDeploymentRules() {
@@ -112,23 +115,54 @@ export async function processDeploymentRules() {
     },
   });
 
-  requests.map(request => {
-    // If request created time is more than wait time ago, then call GH api with approved status
-    // Else call the method to find for new issues for a particular release and call GH api with rejected status
-    checkForNewIssue(
-      request.sha,
-      request.githubRepoId,
-      request.installationId,
-      request.deploymentCallbackUrl
-    );
+  await Promise.all(
+    requests.map(request => {
+      processDeploymentProtectionRuleRequest(request);
+    })
+  );
+}
+
+export async function processDeploymentProtectionRuleRequest(
+  request: DeploymentProtectionRuleRequest
+) {
+  // If request created time is more than wait time ago, then call GH api with approved status
+  const now = new Date();
+  const diffInMs = Math.abs(now.getTime() - request.createdAt.getTime());
+  const diffInSeconds = Math.floor(diffInMs / 1000);
+  const githubRepo = await GithubRepo.findOne({
+    where: {
+      id: request.githubRepoId,
+    },
   });
+  console.log('githubRepo', githubRepo);
+  if (githubRepo) {
+    if (diffInSeconds > githubRepo.waitPeriodToCheckForIssue) {
+      // Call GH api with approved response
+      await callGHPassFailAPI(
+        request.installationId,
+        request.deploymentCallbackUrl,
+        request.environment,
+        DeploymentProtectionRuleStatus.APPROVED
+      );
+    } else {
+      // Else call the method to find for new issues for a particular release and call GH api with rejected status
+      checkForNewIssue(
+        request.sha,
+        request.githubRepoId,
+        request.installationId,
+        request.deploymentCallbackUrl,
+        request.environment
+      );
+    }
+  }
 }
 
 export async function checkForNewIssue(
   releaseId: string,
   githubRepoId: number,
   installationId: number,
-  deploymentCallbackUrl: string
+  deploymentCallbackUrl: string,
+  environment: string
 ) {
   console.log('checkForNewIssue');
   const githubRepo = await GithubRepo.findOne({
@@ -162,38 +196,55 @@ export async function checkForNewIssue(
           console.log('sentryReleaseResponse.newGroups', sentryReleaseResponse.newGroups);
           if (sentryReleaseResponse && sentryReleaseResponse.newGroups) {
             // Call GH api with rejected response
-            const jwtToken = await generateGHAppJWT();
-            const installationToken = await getGithubInstallationAccessToken(
+            await callGHPassFailAPI(
               installationId,
-              jwtToken
+              deploymentCallbackUrl,
+              environment,
+              DeploymentProtectionRuleStatus.REJECTED
             );
-            console.log('installationToken', installationToken);
-            if (installationToken) {
-              const apiResponse = await respondToDeploymentProtectionRule(
-                deploymentCallbackUrl,
-                installationToken,
-                {
-                  state: DeploymentProtectionRuleStatus.REJECTED,
-                  comment: 'Found new issues in Sentry ',
-                  // environment_name: 'production',
-                }
-              );
-              if (apiResponse && apiResponse.status == 204) {
-                const deploymentProtectionRuleRequest =
-                  await DeploymentProtectionRuleRequest.findOne({
-                    where: {
-                      deploymentCallbackUrl: deploymentCallbackUrl,
-                    },
-                  });
-                if (deploymentProtectionRuleRequest) {
-                  deploymentProtectionRuleRequest.update({
-                    status: DeploymentProtectionRuleStatus.APPROVED,
-                  });
-                }
-              }
-            }
           }
         }
+      }
+    }
+  }
+}
+
+async function callGHPassFailAPI(
+  installationId: number,
+  deploymentCallbackUrl: string,
+  environment: string,
+  status: DeploymentProtectionRuleStatus
+) {
+  const jwtToken = await generateGHAppJWT();
+  const installationToken = await getGithubInstallationAccessToken(
+    installationId,
+    jwtToken
+  );
+  console.log('installationToken', installationToken);
+  if (installationToken) {
+    const apiResponse = await respondToDeploymentProtectionRule(
+      deploymentCallbackUrl,
+      installationToken,
+      {
+        state: status,
+        comment:
+          status === DeploymentProtectionRuleStatus.REJECTED
+            ? 'Found new issues in Sentry '
+            : 'No new issues',
+        environment_name: environment,
+      }
+    );
+    if (apiResponse && apiResponse.status == 204) {
+      const deploymentProtectionRuleRequest =
+        await DeploymentProtectionRuleRequest.findOne({
+          where: {
+            deploymentCallbackUrl: deploymentCallbackUrl,
+          },
+        });
+      if (deploymentProtectionRuleRequest) {
+        deploymentProtectionRuleRequest.update({
+          status: status,
+        });
       }
     }
   }

@@ -19,8 +19,6 @@ if (process.env.NODE_ENV === 'test') {
   sequelizeConfig.port = parseInt(process.env.TEST_DB_PORT);
 }
 
-console.log(POSTGRES_PASSWORD);
-console.log(process.env.POSTGRES_PASSWORD);
 // Connect our ORM to the database.
 const sequelize = new Sequelize(POSTGRES_DB, POSTGRES_USER, POSTGRES_PASSWORD, {
   dialect: 'postgres',

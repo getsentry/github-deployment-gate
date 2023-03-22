@@ -18,7 +18,13 @@ export default class DeploymentProtectionRuleRequest extends Model {
   deploymentCallbackUrl: string;
 
   @Column
+  environment: string;
+
+  @Column
   sha: string;
+
+  @Column
+  createdAt: Date;
 
   @ForeignKey(() => GithubRepo)
   @Column
