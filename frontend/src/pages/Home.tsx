@@ -8,7 +8,6 @@ import FailureModal from '../components/FailureModal';
 import Header from '../components/Header';
 import SentryLogo from '../components/SentryLogo';
 import SuccessModal from '../components/SuccessModal';
-import ThemedSelect from '../components/ThemedSelect';
 import {
   ACCESS_TOKEN,
   AVATAR_URL,
@@ -395,7 +394,7 @@ function Home() {
                               Action
                             </div>
                           </div>
-                          {deploymentRequests?.map((deploymentRequest, index) => {
+                          {deploymentRequests?.map(deploymentRequest => {
                             return (
                               <div key={deploymentRequest.id} style={{display: 'flex'}}>
                                 <div
@@ -538,14 +537,6 @@ const Main = styled.main`
   button {
     display: block;
     margin: 0 auto;
-  }
-`;
-const StyledSelect = styled(ThemedSelect)`
-  flex: 1;
-  margin: 1rem;
-  font-size: ${p => p.theme.text.baseSize};
-  * {
-    white-space: normal !important;
   }
 `;
 export default Home;

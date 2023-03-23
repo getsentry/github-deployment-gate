@@ -5,7 +5,7 @@ import request from 'supertest';
 import createItem, {Item} from '../../../factories/Item.factory';
 import createSentryInstallation from '../../../factories/SentryInstallation.factory';
 import {closeTestServer, createTestServer} from '../../../testutils';
-import {ISSUE, MOCK_WEBHOOK, UUID} from './../../../mocks';
+import {ISSUE, MOCK_WEBHOOK, UUID} from '../../../mocks';
 
 const path = '/api/sentry/webhook/';
 

@@ -12,7 +12,7 @@ import {
   METRIC_ALERT,
   MOCK_WEBHOOK,
   UUID,
-} from './../../../mocks';
+} from '../../../mocks';
 
 const path = '/api/sentry/webhook/';
 

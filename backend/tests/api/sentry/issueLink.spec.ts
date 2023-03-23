@@ -6,7 +6,7 @@ import createItem, {Item} from '../../factories/Item.factory';
 import createOrganization, {Organization} from '../../factories/Organization.factory';
 import createSentryInstallation from '../../factories/SentryInstallation.factory';
 import {closeTestServer, createTestServer} from '../../testutils';
-import {MOCK_ISSUE_LINK, UUID} from './../../mocks';
+import {MOCK_ISSUE_LINK, UUID} from '../../mocks';
 
 const path = '/api/sentry/issue-link';
 

@@ -6,7 +6,7 @@ import createItem from '../../factories/Item.factory';
 import createOrganization, {Organization} from '../../factories/Organization.factory';
 import createSentryInstallation from '../../factories/SentryInstallation.factory';
 import {closeTestServer, createTestServer} from '../../testutils';
-import {UUID} from './../../mocks';
+import {UUID} from '../../mocks';
 
 const path = '/api/sentry/options/items/';
 

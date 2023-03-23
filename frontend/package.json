@@ -1,10 +1,13 @@
 {
-  "name": "integration-platform-frontend",
-  "version": "0.0.0",
+  "name": "github-sentry-deployment-gate",
+  "version": "1.0.0",
   "private": true,
   "repository": {
     "type": "git",
-    "url": "git://github.com/getsentry/integration-platform-example.git"
+    "url": "git://github.com/getsentry/github-deployment-gate.git"
+  },
+  "engines": {
+    "node": "16.x"
   },
   "scripts": {
     "start": "react-scripts start",
@@ -65,8 +68,5 @@
     "eslint-plugin-simple-import-sort": "^7.0.0",
     "jest-when": "^3.5.1",
     "prettier": "2.5.1"
-  },
-  "volta": {
-    "node": "16.13.1"
   }
 }

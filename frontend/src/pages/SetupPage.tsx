@@ -9,8 +9,6 @@ import SentryLogo from '../components/SentryLogo';
 import {SENTRY_INSTALLATION_ID, SENTRY_ORG_SLUG} from '../constants/browserStorage';
 import {makeBackendRequest} from '../util';
 
-const REDIRECT_TIMEOUT = 3 * 1000;
-
 function SetupPage() {
   function loginWithGithub() {
     const scope = 'offline_access';
@@ -19,7 +17,6 @@ function SetupPage() {
     );
   }
 
-  const [redirect, setRedirect] = useState('');
   const [setupAPICallState, setSetupAPICallState] = useState('loading');
 
   useEffect(() => {
@@ -79,10 +76,6 @@ export const SentryApplicationLogo = styled(SentryLogo)`
   box-sizing: content-box;
   padding: 1rem;
   border-radius: 1rem;
-`;
-
-const StyledLink = styled.a`
-  color: ${p => p.theme.blue300};
 `;
 
 const PreInstallTextBlock = () => (

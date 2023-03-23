@@ -4,12 +4,12 @@ import {Sequelize} from 'sequelize-typescript';
 
 config();
 
-const {POSTGRES_USER, POSTGRES_PASSWORD, POSTGRES_DB, POSTGRES_HOST, DB_PORT} =
+const {POSTGRES_USER, POSTGRES_PASSWORD, POSTGRES_DB, POSTGRES_HOST, POSTGRES_PORT} =
   process.env;
 
 const sequelizeConfig = {
-  host: POSTGRES_HOST, // Note: This must match the container name for the Docker bridge network to connect properly
-  port: 5432,
+  host: POSTGRES_HOST,
+  port: parseInt(POSTGRES_PORT),
 };
 
 // We modify the Sequelize config to point to our test-database

@@ -5,7 +5,7 @@ import request from 'supertest';
 import createSentryInstallation from '../../factories/SentryInstallation.factory';
 import createUser from '../../factories/User.factory';
 import {closeTestServer, createTestServer} from '../../testutils';
-import {ALERT_RULE_ACTION_VALUES, MOCK_ALERT_RULE_ACTION, UUID} from './../../mocks';
+import {ALERT_RULE_ACTION_VALUES, MOCK_ALERT_RULE_ACTION, UUID} from '../../mocks';
 
 const path = '/api/sentry/alert-rule-action';
 

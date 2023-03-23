@@ -1,5 +1,5 @@
 import styled from '@emotion/styled';
-import React, {useEffect, useState} from 'react';
+import React from 'react';
 
 import BasePage from '../components/BasePage';
 import Button from '../components/Button';
@@ -13,12 +13,6 @@ function Login() {
       `https://github.com/login/oauth/authorize?client_id=${process.env.REACT_APP_GITHUB_CLIENT_ID}&scope=${scope}`
     );
   }
-
-  const [redirect, setRedirect] = useState('');
-
-  useEffect(() => {
-    console.log('use effect started');
-  }, []);
 
   return (
     <BasePage>
@@ -42,10 +36,6 @@ export const SentryApplicationLogo = styled(SentryLogo)`
   box-sizing: content-box;
   padding: 1rem;
   border-radius: 1rem;
-`;
-
-const StyledLink = styled.a`
-  color: ${p => p.theme.blue300};
 `;
 
 const PreInstallTextBlock = () => (

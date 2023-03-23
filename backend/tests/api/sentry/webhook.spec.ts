@@ -6,7 +6,7 @@ import createSentryInstallation, {
   SentryInstallation,
 } from '../../factories/SentryInstallation.factory';
 import {closeTestServer, createTestServer} from '../../testutils';
-import {MOCK_WEBHOOK, UUID} from './../../mocks';
+import {MOCK_WEBHOOK, UUID} from '../../mocks';
 
 const path = '/api/sentry/webhook/';
 

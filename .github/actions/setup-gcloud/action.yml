@@ -1,0 +1,18 @@
+name: "Setup gcloud"
+description: "Setup gcloud"
+
+inputs:
+  service_key_json:
+    description: "GCP Service Account Keyfile JSON"
+    required: true
+
+runs:
+  using: "composite"
+  steps:
+    - name: 🔑 Authenticate on GCS
+      uses: google-github-actions/auth@v1
+      with:
+        credentials_json: "${{ inputs.service_key_json }}"
+
+    - name: 🏗 Set up Cloud SDK
+      uses: google-github-actions/setup-gcloud@v1
