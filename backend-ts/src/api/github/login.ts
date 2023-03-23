@@ -1,5 +1,6 @@
 import axios from 'axios';
 import express from 'express';
+import {handleAxiosError} from '../../util/utils';
 
 import SentryInstallation from '../../models/SentryInstallation.model';
 import User from '../../models/User.model';
@@ -74,25 +75,37 @@ router.get('/getAccessToken', async function (req, res) {
   } catch (error) {
     console.error('Access Token Error', error.message);
     res.status(403).json({
-      message: 'Invalid code',
+      message: error.message,
     });
   }
 });
 
 router.get('/getUserData', async function (req, res) {
   console.log(req.get('Authorization'));
-  const response = await getGithubUserData(req.get('Authorization'));
-  console.log({response});
-  res.json(response.data);
+  try {
+    const response = await getGithubUserData(req.get('Authorization'));
+    console.log({response});
+    res.json(response.data);
+  } catch (error) {
+    res.status(403).json({
+      message: error.message,
+    });
+  }
 });
 
 async function getGithubUserData(accessToken: string) {
-  const response = await axios.get(`https://api.github.com/user`, {
-    headers: {
-      Authorization: accessToken,
-      Accept: 'application/json',
-    },
-  });
+  const response = await axios
+    .get(`https://api.github.com/user`, {
+      headers: {
+        Authorization: accessToken,
+        Accept: 'application/json',
+      },
+    })
+    .catch(function (error) {
+      console.log('Error in getGithubUserData');
+      handleAxiosError(error);
+      throw new Error(error.message);
+    });
   return {status: response.status, data: response.data};
 }
 

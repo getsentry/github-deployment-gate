@@ -22,7 +22,7 @@ function Home() {
   const [githubHandle, setGithubHandle] = useState(
     localStorage.getItem(GITHUB_HANDLE) ? localStorage.getItem(GITHUB_HANDLE) : ''
   );
-  const [repos, setRepos] = useState<Array<GithubRepo>>();
+  const [repos, setRepos] = useState<Array<GithubRepo>>([]);
   const [isFetchRepoAPILoading, setIsFetchRepoAPILoading] = useState(true);
 
   const [sentryInstallation, setSentryInstallation] = useState<SentryInstallation>();
@@ -91,7 +91,7 @@ function Home() {
       const codeParam = searchParams.get('code');
       console.log(codeParam);
       if (codeParam) {
-        getAccessToken(codeParam);
+        await getAccessToken(codeParam);
       } else {
         if (!localStorage.getItem(ACCESS_TOKEN) || !localStorage.getItem(GITHUB_HANDLE)) {
           window.location.assign('/login');
@@ -107,6 +107,30 @@ function Home() {
   }, []);
 
   const [searchParams] = useSearchParams();
+
+  const handleWaitPeriodChange = (value: number, index: number) => {
+    setRepos(prevList => {
+      const newList = [...prevList];
+      newList[index].waitPeriodToCheckForIssue = value;
+      return newList;
+    });
+  };
+
+  const handleUpdateClick = (id: number, index: number) => {
+    const newValue = repos[index].waitPeriodToCheckForIssue;
+
+    // axios.put(`/my-list-api-endpoint/${id}`, { propertyName: newValue })
+    //   .then(response => {
+    //     setMyList(prevList => {
+    //       const newList = [...prevList];
+    //       newList[index] = response.data;
+    //       return newList;
+    //     });
+    //   })
+    //   .catch(error => {
+    //     console.error(error);
+    //   });
+  };
 
   return (
     <BasePage>
@@ -175,14 +199,9 @@ function Home() {
                   <div>
                     <div style={{display: 'flex'}}>
                       <div
-                        style={{width: '25%', textAlign: 'center', fontWeight: 'bold'}}
+                        style={{width: '50%', textAlign: 'center', fontWeight: 'bold'}}
                       >
                         Github Repo
-                      </div>
-                      <div
-                        style={{width: '25%', textAlign: 'center', fontWeight: 'bold'}}
-                      >
-                        Sentry Project
                       </div>
                       <div
                         style={{width: '25%', textAlign: 'center', fontWeight: 'bold'}}
@@ -195,12 +214,12 @@ function Home() {
                         Action
                       </div>
                     </div>
-                    {repos?.map(repo => {
+                    {repos?.map((repo, index) => {
                       return (
-                        <div style={{display: 'flex'}}>
+                        <div key={repo.id} style={{display: 'flex'}}>
                           <div
                             style={{
-                              width: '25%',
+                              width: '50%',
                               textAlign: 'center',
                               paddingTop: '1rem',
                             }}
@@ -210,20 +229,14 @@ function Home() {
                             </label>
                           </div>
                           <div style={{width: '25%', textAlign: 'center'}}>
-                            <StyledSelect
-                              options={sentryInstallation.projectSlugs?.map(s => ({
-                                value: `${s}`,
-                                label: s,
-                              }))}
-                              placeholder="Select a sentry project..."
-                            />{' '}
-                          </div>
-                          <div style={{width: '25%', textAlign: 'center'}}>
                             <input
                               style={{minHeight: '38px', margin: '1rem'}}
                               type="number"
                               id="wait-time"
                               value={repo.waitPeriodToCheckForIssue}
+                              onChange={e =>
+                                handleWaitPeriodChange(Number(e.target.value), index)
+                              }
                             ></input>
                           </div>
                           <div
@@ -237,6 +250,7 @@ function Home() {
                             <button
                               style={{minHeight: '38px', margin: '1rem'}}
                               id="update"
+                              onClick={() => handleUpdateClick(repo.id, index)}
                             >
                               Update
                             </button>

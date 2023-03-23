@@ -15,6 +15,7 @@ import {
   getGithubInstallationAccessToken,
   respondToDeploymentProtectionRule,
 } from '../github';
+import {handleAxiosError} from '../../util/utils';
 
 export type TokenResponseData = {
   expiresAt: string; // ISO date string at which token must be refreshed
@@ -55,48 +56,55 @@ router.post('/', async (req, res) => {
     client_secret: process.env.SENTRY_CLIENT_SECRET,
   };
 
-  // Send that payload to Sentry and parse its response
-  const tokenResponse: {data: TokenResponseData} = await axios.post(
-    `${process.env.SENTRY_URL}/api/0/sentry-app-installations/${installationId}/authorizations/`,
-    payload
-  );
+  try {
+    // Send that payload to Sentry and parse its response
+    const tokenResponse: {data: TokenResponseData} = await axios.post(
+      `${process.env.SENTRY_URL}/api/0/sentry-app-installations/${installationId}/authorizations/`,
+      payload
+    );
 
-  // Store the tokenData (i.e. token, refreshToken, expiresAt) for future requests
-  //    - Make sure to associate the installationId and the tokenData since it's unique to the organization
-  //    - Using the wrong token for the a different installation will result 401 Unauthorized responses
-  const {token, refreshToken, expiresAt} = tokenResponse.data;
-  console.log('Creating SentryInstallation');
-  console.log(installationId, sentryOrgSlug, expiresAt, token, refreshToken);
-  await SentryInstallation.create({
-    uuid: installationId as string,
-    orgSlug: sentryOrgSlug as string,
-    expiresAt: new Date(expiresAt),
-    token,
-    refreshToken,
-  });
-  console.log('Created SentryInstallation');
+    // Store the tokenData (i.e. token, refreshToken, expiresAt) for future requests
+    //    - Make sure to associate the installationId and the tokenData since it's unique to the organization
+    //    - Using the wrong token for the a different installation will result 401 Unauthorized responses
+    const {token, refreshToken, expiresAt} = tokenResponse.data;
+    console.log('Creating SentryInstallation');
+    console.log(installationId, sentryOrgSlug, expiresAt, token, refreshToken);
+    await SentryInstallation.create({
+      uuid: installationId as string,
+      orgSlug: sentryOrgSlug as string,
+      expiresAt: new Date(expiresAt),
+      token,
+      refreshToken,
+    });
+    console.log('Created SentryInstallation');
 
-  // Verify the installation to inform Sentry of the success
-  //    - This step is only required if you have enabled 'Verify Installation' on your integration
-  const verifyResponse: {data: InstallResponseData} = await axios.put(
-    `${process.env.SENTRY_URL}/api/0/sentry-app-installations/${installationId}/`,
-    {status: 'installed'},
-    {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    }
-  );
+    // Verify the installation to inform Sentry of the success
+    //    - This step is only required if you have enabled 'Verify Installation' on your integration
+    const verifyResponse: {data: InstallResponseData} = await axios.put(
+      `${process.env.SENTRY_URL}/api/0/sentry-app-installations/${installationId}/`,
+      {status: 'installed'},
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
 
-  // Continue the installation process
-  // - If your app requires additional configuration, this is where you can do it
-  // - The token/refreshToken can be used to make requests to Sentry's API
-  // - Once you're done, you can optionally redirect the user back to Sentry as we do below
-  console.info(`Installed ${verifyResponse.data.app.slug}'`);
-  res.status(201).send({
-    status: 'success',
-    redirectUrl: `${process.env.SENTRY_URL}/settings/${sentryOrgSlug}/sentry-apps/${verifyResponse.data.app.slug}/`,
-  });
+    // Continue the installation process
+    // - If your app requires additional configuration, this is where you can do it
+    // - The token/refreshToken can be used to make requests to Sentry's API
+    // - Once you're done, you can optionally redirect the user back to Sentry as we do below
+    console.info(`Installed ${verifyResponse.data.app.slug}'`);
+    res.status(201).send({
+      status: 'success',
+      redirectUrl: `${process.env.SENTRY_URL}/settings/${sentryOrgSlug}/sentry-apps/${verifyResponse.data.app.slug}/`,
+    });
+  } catch (error) {
+    res.status(500).json({
+      status: 'error',
+      message: error.message,
+    });
+  }
 });
 
 router.post('/process', async (req, res) => {
@@ -209,11 +217,12 @@ export async function checkForNewIssue(
   }
 }
 
-async function callGHPassFailAPI(
+export async function callGHPassFailAPI(
   installationId: number,
   deploymentCallbackUrl: string,
   environment: string,
-  status: DeploymentProtectionRuleStatus
+  status: DeploymentProtectionRuleStatus,
+  comment?: string
 ) {
   const jwtToken = await generateGHAppJWT();
   const installationToken = await getGithubInstallationAccessToken(
@@ -227,10 +236,11 @@ async function callGHPassFailAPI(
       installationToken,
       {
         state: status,
-        comment:
-          status === DeploymentProtectionRuleStatus.REJECTED
-            ? 'Found new issues in Sentry '
-            : 'No new issues',
+        comment: comment
+          ? comment
+          : status === DeploymentProtectionRuleStatus.REJECTED
+          ? 'Found new issues in Sentry '
+          : 'No new issues',
         environment_name: environment,
       }
     );

@@ -2,6 +2,7 @@ import axios, {AxiosResponse, Method} from 'axios';
 
 import {TokenResponseData} from '../api/sentry/setup';
 import SentryInstallation from '../models/SentryInstallation.model';
+import {handleAxiosError} from './utils';
 
 class SentryAPIClient {
   private token: string;
@@ -34,10 +35,16 @@ class SentryAPIClient {
     };
 
     // Send that payload to Sentry and parse the response
-    const tokenResponse: {data: TokenResponseData} = await axios.post(
-      `${process.env.SENTRY_URL}/api/0/sentry-app-installations/${sentryInstallation.uuid}/authorizations/`,
-      payload
-    );
+    const tokenResponse: {data: TokenResponseData} = await axios
+      .post(
+        `${process.env.SENTRY_URL}/api/0/sentry-app-installations/${sentryInstallation.uuid}/authorizations/`,
+        payload
+      )
+      .catch(function (error) {
+        console.log('Error in getSentryAPIToken');
+        handleAxiosError(error);
+        throw new Error(error.message);
+      });
 
     // Store the token information for future requests
     const {token, refreshToken, expiresAt} = tokenResponse.data;
