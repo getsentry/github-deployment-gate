@@ -5,11 +5,13 @@ import {useSearchParams} from 'react-router-dom';
 import BasePage from '../components/BasePage';
 import Button from '../components/Button';
 import FailureModal from '../components/FailureModal';
+import Header from '../components/Header';
 import SentryLogo from '../components/SentryLogo';
 import SuccessModal from '../components/SuccessModal';
 import ThemedSelect from '../components/ThemedSelect';
 import {
   ACCESS_TOKEN,
+  AVATAR_URL,
   GITHUB_HANDLE,
   SENTRY_INSTALLATION_ID,
 } from '../constants/browserStorage';
@@ -21,6 +23,10 @@ function Home() {
   const [githubHandle, setGithubHandle] = useState(
     localStorage.getItem(GITHUB_HANDLE) ? localStorage.getItem(GITHUB_HANDLE) : ''
   );
+  const [avatarURL, setAvatarURL] = useState(
+    localStorage.getItem(AVATAR_URL) ? localStorage.getItem(AVATAR_URL) : undefined
+  );
+
   const [repos, setRepos] = useState<Array<GithubRepo>>([]);
   const [isFetchRepoAPILoading, setIsFetchRepoAPILoading] = useState(true);
 
@@ -37,11 +43,17 @@ function Home() {
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [showFailureModal, setShowFailureModal] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
-  const handleClose = () => {
+
+  function handleClose() {
     setShowSuccessModal(false);
     setShowFailureModal(false);
     setErrorMessage('');
-  };
+  }
+
+  function handleLogout() {
+    localStorage.clear();
+    window.location.assign('/login');
+  }
 
   useEffect(() => {
     async function fetchGithubRepos(githubHandle: string) {
@@ -112,7 +124,9 @@ function Home() {
         if (response.github_user_data) {
           console.log(response.github_user_data);
           localStorage.setItem(GITHUB_HANDLE, response.github_user_data.data.login);
+          localStorage.setItem(AVATAR_URL, response.github_user_data.data.avatar_url);
           setGithubHandle(response.github_user_data.data.login);
+          setAvatarURL(response.github_user_data.data.avatar_url);
         }
       } else {
         window.location.assign('/login');
@@ -142,15 +156,15 @@ function Home() {
 
   const [searchParams] = useSearchParams();
 
-  const handleWaitPeriodChange = (value: number, index: number) => {
+  function handleWaitPeriodChange(value: number, index: number) {
     setRepos(prevList => {
       const newList = [...prevList];
       newList[index].waitPeriodToCheckForIssue = value;
       return newList;
     });
-  };
+  }
 
-  const handleUpdateClick = async (repoId: number, index: number) => {
+  function handleUpdateClick(repoId: number, index: number) {
     const newValue = repos[index].waitPeriodToCheckForIssue;
 
     makeBackendRequest(
@@ -180,9 +194,9 @@ function Home() {
         setShowFailureModal(true);
         setErrorMessage(error.message);
       });
-  };
+  }
 
-  const handleApproveRejectClick = async (sha: string, action: string) => {
+  function handleApproveRejectClick(sha: string, action: string) {
     makeBackendRequest(
       `/api/github/deploymentgate`,
       {
@@ -211,10 +225,11 @@ function Home() {
         setShowFailureModal(true);
         setErrorMessage(error.message);
       });
-  };
+  }
 
   return (
     <BasePage>
+      <Header onLogout={handleLogout} imageUrl={avatarURL || undefined} />
       <Main>
         {localStorage.getItem(ACCESS_TOKEN) ? (
           <>
