@@ -14,6 +14,16 @@ export type GithubRepo = {
   userId: number;
 };
 
+export type DeploymentRequest = {
+  id: number;
+  status: string;
+  installationId: number;
+  environment: string;
+  sha: string;
+  createdAt: string;
+  githubRepoId: number;
+};
+
 export type SentryInstallation = {
   id: number;
   uuid: string;

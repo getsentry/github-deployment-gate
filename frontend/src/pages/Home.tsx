@@ -3,21 +3,20 @@ import React, {useEffect, useState} from 'react';
 import {useSearchParams} from 'react-router-dom';
 
 import BasePage from '../components/BasePage';
+import Button from '../components/Button';
+import FailureModal from '../components/FailureModal';
 import SentryLogo from '../components/SentryLogo';
+import SuccessModal from '../components/SuccessModal';
 import ThemedSelect from '../components/ThemedSelect';
 import {
   ACCESS_TOKEN,
   GITHUB_HANDLE,
   SENTRY_INSTALLATION_ID,
-  SENTRY_ORG_SLUG,
 } from '../constants/browserStorage';
-import {GithubRepo, SentryInstallation} from '../types';
+import {DeploymentRequest, GithubRepo, SentryInstallation} from '../types';
 import {makeBackendRequest} from '../util';
 
-const REDIRECT_TIMEOUT = 3 * 1000;
-
 function Home() {
-  const [redirect, setRedirect] = useState('');
   const [rerender, setRerender] = useState(false);
   const [githubHandle, setGithubHandle] = useState(
     localStorage.getItem(GITHUB_HANDLE) ? localStorage.getItem(GITHUB_HANDLE) : ''
@@ -28,6 +27,21 @@ function Home() {
   const [sentryInstallation, setSentryInstallation] = useState<SentryInstallation>();
   const [isFetchSentryInstallationAPILoading, setIsFetchSentryInstallationAPILoading] =
     useState(true);
+
+  const [deploymentRequests, setDeploymentRequests] = useState<Array<DeploymentRequest>>(
+    []
+  );
+  const [isFetchDeploymentReqAPILoading, setIsFetchDeploymentReqAPILoading] =
+    useState(true);
+
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [showFailureModal, setShowFailureModal] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
+  const handleClose = () => {
+    setShowSuccessModal(false);
+    setShowFailureModal(false);
+    setErrorMessage('');
+  };
 
   useEffect(() => {
     async function fetchGithubRepos(githubHandle: string) {
@@ -46,6 +60,24 @@ function Home() {
         setRepos(response.data);
       }
     }
+
+    async function fetchDeploymentRequests(githubHandle: string) {
+      const response = await makeBackendRequest(
+        `/api/github/deployment/requests?githubHandle=${githubHandle}`,
+        undefined,
+        {
+          method: 'GET',
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem(ACCESS_TOKEN)}`,
+          },
+        }
+      );
+      setIsFetchDeploymentReqAPILoading(false);
+      if (response && response.data) {
+        setDeploymentRequests(response.data);
+      }
+    }
+
     async function fetchSentryInstallation(githubHandle: string) {
       const response = await makeBackendRequest(
         `/api/github/sentryInstallation?githubHandle=${githubHandle}`,
@@ -92,6 +124,7 @@ function Home() {
       console.log(codeParam);
       if (codeParam) {
         await getAccessToken(codeParam);
+        window.location.assign('/home');
       } else {
         if (!localStorage.getItem(ACCESS_TOKEN) || !localStorage.getItem(GITHUB_HANDLE)) {
           window.location.assign('/login');
@@ -101,10 +134,11 @@ function Home() {
       if (githubHandle) {
         fetchGithubRepos(githubHandle);
         fetchSentryInstallation(githubHandle);
+        fetchDeploymentRequests(githubHandle);
       }
     }
     process();
-  }, []);
+  }, [rerender]);
 
   const [searchParams] = useSearchParams();
 
@@ -116,20 +150,67 @@ function Home() {
     });
   };
 
-  const handleUpdateClick = (id: number, index: number) => {
+  const handleUpdateClick = async (repoId: number, index: number) => {
     const newValue = repos[index].waitPeriodToCheckForIssue;
 
-    // axios.put(`/my-list-api-endpoint/${id}`, { propertyName: newValue })
-    //   .then(response => {
-    //     setMyList(prevList => {
-    //       const newList = [...prevList];
-    //       newList[index] = response.data;
-    //       return newList;
-    //     });
-    //   })
-    //   .catch(error => {
-    //     console.error(error);
-    //   });
+    makeBackendRequest(
+      `/api/github/repo/waittime`,
+      {
+        repoId: repoId,
+        waitTime: newValue,
+      },
+      {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem(ACCESS_TOKEN)}`,
+          'Content-Type': 'application/json',
+        },
+      }
+    )
+      .then(response => {
+        console.log({response});
+        if (response && response.status === 'success') {
+          setShowSuccessModal(true);
+        } else {
+          setShowFailureModal(true);
+          setErrorMessage(response.message);
+        }
+      })
+      .catch(error => {
+        setShowFailureModal(true);
+        setErrorMessage(error.message);
+      });
+  };
+
+  const handleApproveRejectClick = async (sha: string, action: string) => {
+    makeBackendRequest(
+      `/api/github/deploymentgate`,
+      {
+        releaseId: sha,
+        status: action,
+      },
+      {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem(ACCESS_TOKEN)}`,
+          'Content-Type': 'application/json',
+        },
+      }
+    )
+      .then(response => {
+        console.log({response});
+        if (response && response.status === 'success') {
+          setRerender(!rerender);
+          setShowSuccessModal(true);
+        } else {
+          setShowFailureModal(true);
+          setErrorMessage(response.message);
+        }
+      })
+      .catch(error => {
+        setShowFailureModal(true);
+        setErrorMessage(error.message);
+      });
   };
 
   return (
@@ -158,10 +239,10 @@ function Home() {
                     </>
                   ) : (
                     <div style={{marginBottom: '2rem'}}>
-                      Github Repos:
+                      {/* Github Repos:
                       {repos.map(s => {
                         return <div key={s.name}>{s.name}</div>;
-                      })}
+                      })} */}
                     </div>
                   )
                 ) : (
@@ -180,86 +261,216 @@ function Home() {
                     </>
                   ) : (
                     <div style={{marginBottom: '2rem'}}>
-                      Sentry Projects:
+                      {/* Sentry Projects:
                       {sentryInstallation.projectSlugs.map(s => {
                         return <div key={s}>{s}</div>;
-                      })}
+                      })} */}
                     </div>
                   )
                 ) : (
                   <></>
                 )}
-                {!isFetchRepoAPILoading &&
-                !isFetchSentryInstallationAPILoading &&
-                repos &&
-                repos.length > 0 &&
-                sentryInstallation &&
-                sentryInstallation.projectSlugs &&
-                sentryInstallation.projectSlugs.length > 0 ? (
-                  <div>
-                    <div style={{display: 'flex'}}>
-                      <div
-                        style={{width: '50%', textAlign: 'center', fontWeight: 'bold'}}
-                      >
-                        Github Repo
-                      </div>
-                      <div
-                        style={{width: '25%', textAlign: 'center', fontWeight: 'bold'}}
-                      >
-                        Wait Time (In Seconds)
-                      </div>
-                      <div
-                        style={{width: '25%', textAlign: 'center', fontWeight: 'bold'}}
-                      >
-                        Action
-                      </div>
-                    </div>
-                    {repos?.map((repo, index) => {
-                      return (
-                        <div key={repo.id} style={{display: 'flex'}}>
-                          <div
-                            style={{
-                              width: '50%',
-                              textAlign: 'center',
-                              paddingTop: '1rem',
-                            }}
-                          >
-                            <label style={{fontSize: '20px', margin: '1rem'}}>
-                              {repo.name}
-                            </label>
-                          </div>
-                          <div style={{width: '25%', textAlign: 'center'}}>
-                            <input
-                              style={{minHeight: '38px', margin: '1rem'}}
-                              type="number"
-                              id="wait-time"
-                              value={repo.waitPeriodToCheckForIssue}
-                              onChange={e =>
-                                handleWaitPeriodChange(Number(e.target.value), index)
-                              }
-                            ></input>
-                          </div>
-                          <div
-                            style={{
-                              width: '25%',
-                              textAlign: 'center',
-                              display: 'flex',
-                              justifyContent: 'center',
-                            }}
-                          >
-                            <button
-                              style={{minHeight: '38px', margin: '1rem'}}
-                              id="update"
-                              onClick={() => handleUpdateClick(repo.id, index)}
-                            >
-                              Update
-                            </button>
-                          </div>
+                {!isFetchRepoAPILoading && repos && repos.length > 0 ? (
+                  <>
+                    <div>
+                      <div style={{display: 'flex'}}>
+                        <div
+                          style={{width: '50%', textAlign: 'center', fontWeight: 'bold'}}
+                        >
+                          Github Repo
                         </div>
-                      );
-                    })}
-                    <div></div>
-                  </div>
+                        <div
+                          style={{width: '25%', textAlign: 'center', fontWeight: 'bold'}}
+                        >
+                          Wait Time (In Seconds)
+                        </div>
+                        <div
+                          style={{width: '25%', textAlign: 'center', fontWeight: 'bold'}}
+                        >
+                          Action
+                        </div>
+                      </div>
+                      {repos?.map((repo, index) => {
+                        return (
+                          <div key={repo.id} style={{display: 'flex'}}>
+                            <div
+                              style={{
+                                width: '50%',
+                                textAlign: 'center',
+                                paddingTop: '1rem',
+                              }}
+                            >
+                              <label style={{fontSize: '20px', margin: '1rem'}}>
+                                {repo.name}
+                              </label>
+                            </div>
+                            <div style={{width: '25%', textAlign: 'center'}}>
+                              <input
+                                style={{minHeight: '38px', margin: '1rem'}}
+                                type="number"
+                                id="wait-time"
+                                value={repo.waitPeriodToCheckForIssue}
+                                onChange={e =>
+                                  handleWaitPeriodChange(Number(e.target.value), index)
+                                }
+                              ></input>
+                            </div>
+                            <div
+                              style={{
+                                width: '25%',
+                                textAlign: 'center',
+                                display: 'flex',
+                                justifyContent: 'center',
+                              }}
+                            >
+                              <Button
+                                id={'update' + repo.id}
+                                style={{minHeight: '38px', margin: '1rem', width: '8rem'}}
+                                onClick={() => handleUpdateClick(repo.id, index)}
+                              >
+                                Update
+                              </Button>
+                            </div>
+                          </div>
+                        );
+                      })}
+                      <div></div>
+                    </div>
+                    {!isFetchDeploymentReqAPILoading &&
+                    deploymentRequests &&
+                    deploymentRequests.length > 0 ? (
+                      <div>
+                        <h3>Pending Deployment Requests</h3>
+                        <div>
+                          <div style={{display: 'flex'}}>
+                            <div
+                              style={{
+                                width: '30%',
+                                textAlign: 'center',
+                                fontWeight: 'bold',
+                              }}
+                            >
+                              Github Repo
+                            </div>
+                            <div
+                              style={{
+                                width: '30%',
+                                textAlign: 'center',
+                                fontWeight: 'bold',
+                              }}
+                            >
+                              SHA
+                            </div>
+                            <div
+                              style={{
+                                width: '20%',
+                                textAlign: 'center',
+                                fontWeight: 'bold',
+                              }}
+                            >
+                              Requested At
+                            </div>
+                            <div
+                              style={{
+                                width: '20%',
+                                textAlign: 'center',
+                                fontWeight: 'bold',
+                              }}
+                            >
+                              Action
+                            </div>
+                          </div>
+                          {deploymentRequests?.map((deploymentRequest, index) => {
+                            return (
+                              <div key={deploymentRequest.id} style={{display: 'flex'}}>
+                                <div
+                                  style={{
+                                    width: '30%',
+                                    textAlign: 'center',
+                                    paddingTop: '1rem',
+                                  }}
+                                >
+                                  <label style={{fontSize: '12px', margin: '1rem'}}>
+                                    {
+                                      repos.find(
+                                        repo => repo.id == deploymentRequest.githubRepoId
+                                      )?.name
+                                    }
+                                  </label>
+                                </div>
+                                <div
+                                  style={{
+                                    width: '30%',
+                                    textAlign: 'center',
+                                    paddingTop: '1rem',
+                                  }}
+                                >
+                                  <label style={{fontSize: '12px', margin: '1rem'}}>
+                                    {deploymentRequest.sha}
+                                  </label>
+                                </div>
+                                <div
+                                  style={{
+                                    width: '20%',
+                                    textAlign: 'center',
+                                    paddingTop: '1rem',
+                                  }}
+                                >
+                                  <label style={{fontSize: '12px', margin: '1rem'}}>
+                                    {deploymentRequest.createdAt}
+                                  </label>
+                                </div>
+
+                                <div
+                                  style={{
+                                    width: '20%',
+                                    textAlign: 'center',
+                                    display: 'flex',
+                                    justifyContent: 'center',
+                                  }}
+                                >
+                                  <Button
+                                    id={'approve' + deploymentRequest.id}
+                                    style={{
+                                      minHeight: '38px',
+                                      margin: '1rem',
+                                      width: '6rem',
+                                    }}
+                                    onClick={() =>
+                                      handleApproveRejectClick(
+                                        deploymentRequest.sha,
+                                        'approved'
+                                      )
+                                    }
+                                  >
+                                    Approve
+                                  </Button>
+                                  <Button
+                                    id={'reject-' + deploymentRequest.id}
+                                    style={{
+                                      minHeight: '38px',
+                                      margin: '1rem',
+                                      width: '6rem',
+                                    }}
+                                    onClick={() =>
+                                      handleApproveRejectClick(
+                                        deploymentRequest.sha,
+                                        'rejected'
+                                      )
+                                    }
+                                  >
+                                    Reject
+                                  </Button>
+                                </div>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    ) : (
+                      <></>
+                    )}
+                  </>
                 ) : (
                   <></>
                 )}
@@ -269,6 +480,12 @@ function Home() {
           </>
         ) : (
           <></>
+        )}
+
+        {showSuccessModal && <SuccessModal onClose={handleClose} />}
+
+        {showFailureModal && (
+          <FailureModal onClose={handleClose} message={errorMessage} />
         )}
       </Main>
     </BasePage>

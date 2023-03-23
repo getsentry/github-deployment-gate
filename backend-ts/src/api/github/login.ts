@@ -81,7 +81,6 @@ router.get('/getAccessToken', async function (req, res) {
 });
 
 router.get('/getUserData', async function (req, res) {
-  console.log(req.get('Authorization'));
   try {
     const response = await getGithubUserData(req.get('Authorization'));
     console.log({response});

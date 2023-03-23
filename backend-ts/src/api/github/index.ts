@@ -24,7 +24,6 @@ router.use('/setup', setupRoutes);
 router.use('/webhook', webhookRoutes);
 
 router.get('/githubRepo', async function (req, res) {
-  console.log(req.get('Authorization'));
   if (!req.query.githubHandle) {
     res.status(403).json({
       status: 'error',
@@ -57,7 +56,6 @@ router.get('/githubRepo', async function (req, res) {
 });
 
 router.get('/sentryInstallation', async function (req, res) {
-  console.log(req.get('Authorization'));
   if (!req.query.githubHandle) {
     res.status(400).json({
       status: 'error',
@@ -160,6 +158,63 @@ router.post('/deploymentgate', async (req, res) => {
     res.status(200).json({
       status: 'success',
       message: `Manually ${status}`,
+    });
+  } catch (error) {
+    res.status(500).json({
+      status: 'error',
+      message: error.message,
+    });
+  }
+});
+
+router.get('/deployment/requests', async (req, res) => {
+  const githubHandle = String(req.query.githubHandle);
+  console.log(githubHandle);
+  if (!githubHandle) {
+    res.status(400).json({
+      status: 'error',
+      message: 'Please provide githubHandle',
+    });
+    return;
+  }
+  try {
+    const user = await User.findOne({
+      where: {
+        githubHandle: githubHandle,
+      },
+    });
+    if (!user) {
+      throw new Error('Invalid githubHandle');
+    }
+    const githubRepos = await GithubRepo.findAll({
+      where: {
+        userId: user.id,
+      },
+    });
+    console.log({githubRepos});
+    if (!githubRepos || githubRepos.length === 0) {
+      res.status(200).json({
+        status: 'success',
+        data: [],
+      });
+    }
+
+    const deploymentRequests: Array<DeploymentProtectionRuleRequest> = [];
+    for (let i = 0; i < githubRepos.length; i++) {
+      const repo = githubRepos[i];
+      const requests = await DeploymentProtectionRuleRequest.findAll({
+        where: {
+          githubRepoId: repo.id,
+          status: DeploymentProtectionRuleStatus.REQUESTED,
+        },
+      });
+      console.log({requests});
+      deploymentRequests.push(...requests);
+    }
+
+    res.status(200).json({
+      status: 'success',
+      data: deploymentRequests,
     });
   } catch (error) {
     res.status(500).json({
