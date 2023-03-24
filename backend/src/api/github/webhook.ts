@@ -13,7 +13,6 @@ const router = express.Router();
 router.post('/deploymentRule', async function (req, res) {
   console.log('deploymentRule');
   const deploymentRule: DeploymentRuleDTO = req.body;
-  console.log({deploymentRule});
   switch (deploymentRule.action) {
     case DeploymentRuleAction.ADDED:
       if (deploymentRule.repositories_added) {
@@ -40,11 +39,18 @@ router.post('/deploymentRule', async function (req, res) {
       break;
     case DeploymentRuleAction.CREATED:
       if (deploymentRule.repositories) {
+        let user = await User.findOne({
+          where: {githubHandle: deploymentRule.installation.account.login},
+        });
+        if (!user) {
+          user = await User.create({
+            name: deploymentRule.installation.account.login,
+            githubHandle: deploymentRule.installation.account.login,
+            avatar: deploymentRule.installation.account.login,
+          });
+        }
         for (let i = 0; i < deploymentRule.repositories.length; i++) {
           const repo = deploymentRule.repositories[i];
-          const user = await User.findOne({
-            where: {githubHandle: deploymentRule.installation.account.login},
-          });
           const githubRepo = await GithubRepo.findOne({
             where: {name: repo.full_name},
           });

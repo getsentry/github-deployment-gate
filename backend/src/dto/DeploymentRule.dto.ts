@@ -14,6 +14,7 @@ export class DeploymentRuleDTO {
     id: number;
     account: {
       login: string;
+      avatar_url: string;
     };
   };
   repositories: Array<{

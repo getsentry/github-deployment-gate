@@ -40,7 +40,6 @@ function SetupPage() {
         method: 'POST',
       });
       setSetupAPICallState(response.status);
-      console.log(response.status);
     }
     createSentryInstallationEntry();
   }, []);

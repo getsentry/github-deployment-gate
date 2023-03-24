@@ -11,7 +11,7 @@ function getSignatureBody(req: Request): string {
   return stringifiedBody === '{}' ? '' : stringifiedBody;
 }
 
-export default function verifySentrySignature(
+export default function verifyGithubSignature(
   request: Request,
   response: Response,
   next: NextFunction

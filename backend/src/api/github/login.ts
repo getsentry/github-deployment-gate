@@ -22,45 +22,33 @@ router.get('/getAccessToken', async function (req, res) {
   try {
     const response = await axios.post(tokenUrl, data, {headers});
     const {access_token, refresh_token} = response.data;
-    console.log('Access token:', access_token);
-    console.log('Refresh token:', refresh_token);
     if (access_token) {
       const githubUserData = await getGithubUserData(`Bearer ${access_token}`);
-      console.log(githubUserData);
       // check if user already exists??
 
-      const user = await User.findOne({
+      let user = await User.findOne({
         where: {
           githubHandle: githubUserData.data.login,
         },
       });
 
-      let sentryInstallationId = null;
+      //If User does not already exists
+      if (!user) {
+        user = await User.create({
+          name: githubUserData.data.login,
+          githubHandle: githubUserData.data.login,
+          refreshToken: refresh_token,
+          avatar: githubUserData.data.avatar_url,
+        });
+      }
+
       if (sentryInstallationUUID != 'null') {
         const installation = await SentryInstallation.findOne({
           where: {uuid: sentryInstallationUUID},
         });
         if (installation) {
-          sentryInstallationId = installation.id;
+          await installation.update({userId: user.id});
         }
-      }
-
-      //If User already exists
-      if (user) {
-        if (sentryInstallationId) {
-          await User.update(
-            {sentryInstallationId: sentryInstallationId},
-            {where: {githubHandle: githubUserData.data.login}}
-          );
-        }
-      } else {
-        await User.create({
-          name: githubUserData.data.login,
-          githubHandle: githubUserData.data.login,
-          refreshToken: refresh_token,
-          avatar: githubUserData.data.avatar_url,
-          sentryInstallationId: sentryInstallationId,
-        });
       }
 
       res.status(200).json({
@@ -83,7 +71,6 @@ router.get('/getAccessToken', async function (req, res) {
 router.get('/getUserData', async function (req, res) {
   try {
     const response = await getGithubUserData(req.get('Authorization'));
-    console.log({response});
     res.json(response.data);
   } catch (error) {
     res.status(403).json({

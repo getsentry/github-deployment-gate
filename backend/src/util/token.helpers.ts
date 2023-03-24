@@ -21,12 +21,9 @@ export async function generateGHAppJWT() {
     iss: process.env.GITHUB_APP_ID,
   };
 
-  // const secretKey = process.env.GITHUB_APP_PRIVATE_KEY; // Set your secret key here
-  const fs = require('fs');
-  const secretKey = fs.readFileSync(process.env.GITHUB_APP_PEM_FILE_PATH);
+  const secretKey = process.env.GITHUB_APP_PRIVATE_KEY; // Set your secret key here
   const token = jwt.sign(payload, secretKey, {algorithm: 'RS256', expiresIn: '10m'});
 
-  console.log(token);
   return token;
 }
 

@@ -18,6 +18,7 @@ function App() {
           <Route path="/sentry/setup" element={<SetupPage />} />
           <Route path="/home" element={<Home />} />
           <Route path="/login" element={<Login />} />
+          <Route path="/" element={<Login />} />
         </Routes>
       </Router>
     </ThemeProvider>

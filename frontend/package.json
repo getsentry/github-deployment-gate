@@ -9,11 +9,10 @@
   "engines": {
     "node": "16.x"
   },
+  "proxy": "http://localhost:5200",
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build",
-    "test": "react-scripts test",
-    "eject": "react-scripts eject",
     "lint": "eslint . --ext .ts,.tsx && prettier -c src",
     "lint:fix": "eslint . --ext .ts,.tsx --fix && prettier -c src --write"
   },

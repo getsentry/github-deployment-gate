@@ -68,13 +68,13 @@ router.post('/', async (req, res) => {
     //    - Using the wrong token for the a different installation will result 401 Unauthorized responses
     const {token, refreshToken, expiresAt} = tokenResponse.data;
     console.log('Creating SentryInstallation');
-    console.log(installationId, sentryOrgSlug, expiresAt, token, refreshToken);
     await SentryInstallation.create({
       uuid: installationId as string,
       orgSlug: sentryOrgSlug as string,
       expiresAt: new Date(expiresAt),
       token,
       refreshToken,
+      createdAt: new Date(),
     });
     console.log('Created SentryInstallation');
 
@@ -142,7 +142,6 @@ export async function processDeploymentProtectionRuleRequest(
       id: request.githubRepoId,
     },
   });
-  console.log('githubRepo', githubRepo);
   if (githubRepo) {
     if (diffInSeconds > githubRepo.waitPeriodToCheckForIssue) {
       // Call GH api with approved response
@@ -178,29 +177,29 @@ export async function checkForNewIssue(
       id: githubRepoId,
     },
   });
-  console.log('githubRepo', githubRepo);
   if (githubRepo) {
     const user = await User.findOne({
       where: {
         id: githubRepo.userId,
       },
     });
-    console.log('user', user);
-    if (user && user.sentryInstallationId) {
-      const sentryInstallation = await SentryInstallation.findOne({
+    if (user) {
+      const sentryInstallations = await SentryInstallation.findAll({
         where: {
-          id: user.sentryInstallationId,
+          userId: user.id,
         },
+        order: [['createdAt', 'DESC']],
       });
-      console.log('sentryInstallation', sentryInstallation);
-      if (sentryInstallation) {
+      if (sentryInstallations && sentryInstallations.length > 0) {
+        // The below line can be replaced by the logic which finds out which sentry installation/org_slug is mapped to the github repo in discussion
+        const sentryInstallation = sentryInstallations[0];
+
         const sentry = await SentryAPIClient.create(sentryInstallation.uuid);
         const response = await sentry.get(
           `/organizations/${sentryInstallation.orgSlug}/releases/${releaseId}/`
         );
         if (response) {
           const sentryReleaseResponse: SentyReleaseResponseDTO = response.data;
-          console.log({sentryReleaseResponse});
           console.log('sentryReleaseResponse.newGroups', sentryReleaseResponse.newGroups);
           if (sentryReleaseResponse && sentryReleaseResponse.newGroups) {
             // Call GH api with rejected response

@@ -33,6 +33,8 @@ CREATE TABLE public.sentry_installation (
     token character varying(255),
     refresh_token character varying(255),
     expires_at timestamp with time zone,
+    user_id integer,
+    created_at timestamp with time zone
 );
 
 
@@ -68,9 +70,8 @@ CREATE TABLE public.github_repo (
     name character varying(255),
     sentry_project_slug character varying(255),
     wait_period_to_check_for_issue integer,
-    sentry_installation_id integer,
     user_id integer,
-    is_active boolean;
+    is_active boolean
 );
 
 
@@ -110,7 +111,7 @@ CREATE TABLE public.deployment_protection_rule_request (
     deployment_callback_url character varying(512),
     sha character varying(512),
     created_at timestamp with time zone,
-    github_repo_id integer,
+    github_repo_id integer
 );
 
 
@@ -149,7 +150,6 @@ CREATE TABLE public."user" (
     github_handle character varying(255),
     refresh_token character varying(255),
     username character varying(255),
-    sentry_installation_id integer,
     avatar character varying(255),
     organization_id integer
 );
@@ -288,19 +288,11 @@ ALTER TABLE ONLY public.github_repo
 
 
 --
--- Name: github_repo github_repo_sentry_installation_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: admin
+-- Name: sentry_installation sentry_installation_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: admin
 --
 
-ALTER TABLE ONLY public.github_repo
-    ADD CONSTRAINT github_repo_sentry_installation_id_fkey FOREIGN KEY (sentry_installation_id) REFERENCES public.sentry_installation(id) ON UPDATE CASCADE ON DELETE CASCADE;
-
-
---
--- Name: github_repo github_repo_sentry_installation_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: admin
---
-
-ALTER TABLE ONLY public."user"
-    ADD CONSTRAINT user_sentry_installation_id_fkey FOREIGN KEY (sentry_installation_id) REFERENCES public.sentry_installation(id) ON UPDATE CASCADE ON DELETE CASCADE;
+ALTER TABLE ONLY public.sentry_installation
+    ADD CONSTRAINT sentry_installation_user_id_fkey FOREIGN KEY (user_id) REFERENCES public."user"(id) ON UPDATE CASCADE ON DELETE CASCADE;
 
 
 --

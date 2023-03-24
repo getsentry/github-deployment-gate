@@ -14,14 +14,10 @@ export default class GithubRepo extends Model {
   @Column
   waitPeriodToCheckForIssue: number;
 
-  @ForeignKey(() => SentryInstallation)
-  @Column
-  sentryInstallationId: number;
-
   @ForeignKey(() => User)
   @Column
   userId: number;
 
-  @Column
+  @Column({defaultValue: () => true})
   isActive: boolean;
 }

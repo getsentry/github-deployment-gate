@@ -1,10 +1,18 @@
 import 'dotenv/config';
+import bodyParser from 'body-parser';
 import express from 'express';
 import apiRoutes from './api';
 import {sequelize} from './models';
 
 function createServer() {
   const server = express();
+  server.use(
+    bodyParser.json({
+      verify: (req, res, buf) => {
+        (<any>req).rawBody = buf;
+      },
+    })
+  );
   server.use(express.json());
   server.get('/', (_req, res) => res.sendStatus(200));
   server.use('/api', apiRoutes);

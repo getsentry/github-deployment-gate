@@ -10,7 +10,6 @@ export type GithubRepo = {
   name: string;
   sentryProjectSlug: string;
   waitPeriodToCheckForIssue: number;
-  sentryInstallationId: number;
   userId: number;
 };
 

@@ -7,7 +7,6 @@ import webhookRoutes from './webhook';
 import GithubRepo from '../../models/GithubRepo.model';
 import SentryInstallation from '../../models/SentryInstallation.model';
 import User from '../../models/User.model';
-import SentryAPIClient from '../../util/SentryAPIClient';
 import {generateGHAppJWT} from '../../util/token.helpers';
 import {
   DeploymentProtectionRuleStatus,
@@ -16,12 +15,13 @@ import {
 import {handleAxiosError} from '../../util/utils';
 import DeploymentProtectionRuleRequest from '../../models/DeploymentProtectionRuleRequest.model';
 import {callGHPassFailAPI} from '../sentry/setup';
+import {verifyGithubSignature} from '../middleware';
 
 const router = express.Router();
 
 router.use('/login', loginRoutes);
 router.use('/setup', setupRoutes);
-router.use('/webhook', webhookRoutes);
+router.use('/webhook', verifyGithubSignature, webhookRoutes);
 
 router.get('/githubRepo', async function (req, res) {
   if (!req.query.githubHandle) {
@@ -81,29 +81,15 @@ router.get('/sentryInstallation', async function (req, res) {
       });
       return;
     }
-    const sentryInstallation = await SentryInstallation.findOne({
+    const sentryInstallations = await SentryInstallation.findAll({
       where: {
-        id: user.sentryInstallationId,
+        userId: user.id,
       },
     });
-    let sentryData;
-    if (sentryInstallation) {
-      const sentry = await SentryAPIClient.create(sentryInstallation.uuid);
-      sentryData = await sentry.get(
-        `/organizations/${sentryInstallation.orgSlug}/projects/`
-      );
+    if (sentryInstallations && sentryInstallations.length > 0) {
       res.status(200).json({
         status: 'success',
-        data: {
-          id: sentryInstallation.id,
-          uuid: sentryInstallation.uuid,
-          orgSlug: sentryInstallation.orgSlug,
-          token: sentryInstallation.token,
-          expiresAt: sentryInstallation.expiresAt,
-          projectSlugs: sentryData
-            ? sentryData.data.map((s: {slug: string}) => s.slug)
-            : [],
-        },
+        data: sentryInstallations,
       });
     } else {
       res.status(200).json({
@@ -121,7 +107,6 @@ router.get('/sentryInstallation', async function (req, res) {
 
 router.post('/deploymentgate', async (req, res) => {
   const {releaseId, status} = req.body;
-  console.log(status);
   if (!status || !releaseId) {
     res.status(400).json({
       status: 'error',
@@ -169,7 +154,6 @@ router.post('/deploymentgate', async (req, res) => {
 
 router.get('/deployment/requests', async (req, res) => {
   const githubHandle = String(req.query.githubHandle);
-  console.log(githubHandle);
   if (!githubHandle) {
     res.status(400).json({
       status: 'error',
@@ -191,7 +175,6 @@ router.get('/deployment/requests', async (req, res) => {
         userId: user.id,
       },
     });
-    console.log({githubRepos});
     if (!githubRepos || githubRepos.length === 0) {
       res.status(200).json({
         status: 'success',
@@ -208,7 +191,6 @@ router.get('/deployment/requests', async (req, res) => {
           status: DeploymentProtectionRuleStatus.REQUESTED,
         },
       });
-      console.log({requests});
       deploymentRequests.push(...requests);
     }
 
@@ -226,7 +208,6 @@ router.get('/deployment/requests', async (req, res) => {
 
 router.post('/repo/waittime', async (req, res) => {
   const {repoId, waitTime} = req.body;
-  console.log(repoId, waitTime);
   if (!repoId || !waitTime) {
     res.status(400).json({
       status: 'error',
@@ -257,7 +238,6 @@ router.post('/repo/waittime', async (req, res) => {
 });
 
 router.get('/generate', async function (req, res) {
-  console.log(req.get('generate'));
   const token = await generateGHAppJWT();
   // const token = await getGithubAccessToken();
   res.status(200).json({
@@ -330,11 +310,6 @@ export async function respondToDeploymentProtectionRule(
       console.log('Error in respondToDeploymentProtectionRule');
       handleAxiosError(error);
     });
-  console.log('response', response);
-  if (response) {
-    console.log('response.data', response.data);
-    console.log('response.status', response.status);
-  }
   return response;
 }
 

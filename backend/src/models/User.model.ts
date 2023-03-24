@@ -15,8 +15,4 @@ export default class User extends Model {
 
   @Column
   avatar: string;
-
-  @ForeignKey(() => SentryInstallation)
-  @Column
-  sentryInstallationId: number;
 }

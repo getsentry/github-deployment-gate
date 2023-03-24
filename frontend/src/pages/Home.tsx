@@ -29,7 +29,8 @@ function Home() {
   const [repos, setRepos] = useState<Array<GithubRepo>>([]);
   const [isFetchRepoAPILoading, setIsFetchRepoAPILoading] = useState(true);
 
-  const [sentryInstallation, setSentryInstallation] = useState<SentryInstallation>();
+  const [sentryInstallations, setSentryInstallations] =
+    useState<Array<SentryInstallation>>();
   const [isFetchSentryInstallationAPILoading, setIsFetchSentryInstallationAPILoading] =
     useState(true);
 
@@ -101,7 +102,7 @@ function Home() {
         }
       );
       if (response && response.data) {
-        setSentryInstallation(response.data);
+        setSentryInstallations(response.data);
       }
       setIsFetchSentryInstallationAPILoading(false);
     }
@@ -121,7 +122,6 @@ function Home() {
         localStorage.setItem(ACCESS_TOKEN, response.access_token);
         setRerender(!rerender);
         if (response.github_user_data) {
-          console.log(response.github_user_data);
           localStorage.setItem(GITHUB_HANDLE, response.github_user_data.data.login);
           localStorage.setItem(AVATAR_URL, response.github_user_data.data.avatar_url);
           setGithubHandle(response.github_user_data.data.login);
@@ -134,7 +134,6 @@ function Home() {
     }
     async function process() {
       const codeParam = searchParams.get('code');
-      console.log(codeParam);
       if (codeParam) {
         await getAccessToken(codeParam);
         window.location.assign('/home');
@@ -181,7 +180,6 @@ function Home() {
       }
     )
       .then(response => {
-        console.log({response});
         if (response && response.status === 'success') {
           setShowSuccessModal(true);
         } else {
@@ -211,7 +209,6 @@ function Home() {
       }
     )
       .then(response => {
-        console.log({response});
         if (response && response.status === 'success') {
           setRerender(!rerender);
           setShowSuccessModal(true);
@@ -263,7 +260,7 @@ function Home() {
                   <></>
                 )}
                 {!isFetchSentryInstallationAPILoading ? (
-                  !sentryInstallation ? (
+                  !sentryInstallations ? (
                     <>
                       <p>
                         You have not installed our Sentry integration yet. Please install
