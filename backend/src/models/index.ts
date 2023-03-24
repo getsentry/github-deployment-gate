@@ -2,6 +2,12 @@ import {config} from 'dotenv';
 import path from 'path';
 import {Sequelize} from 'sequelize-typescript';
 
+import DeploymentProtectionRuleRequest from './DeploymentProtectionRuleRequest.model';
+import GithubRepo from './GithubRepo.model';
+import SentryInstallation from './SentryInstallation.model';
+import User from './User.model';
+
+
 config();
 
 const {POSTGRES_USER, POSTGRES_PASSWORD, POSTGRES_DB, POSTGRES_HOST, POSTGRES_PORT} =
@@ -26,5 +32,12 @@ const sequelize = new Sequelize(POSTGRES_DB, POSTGRES_USER, POSTGRES_PASSWORD, {
   models: [__dirname + '/**/*.model.ts'],
   ...sequelizeConfig,
 });
+
+sequelize.addModels([
+  User,
+  SentryInstallation,
+  DeploymentProtectionRuleRequest,
+  GithubRepo,
+]);
 
 export {sequelize};
