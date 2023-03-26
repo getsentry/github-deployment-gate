@@ -100,7 +100,7 @@ export const darkColors = {
   pink100: 'rgba(209, 71, 140, 0.13)',
 };
 
-const darkTheme = {...baseTheme, ...darkColors, inverted: {...lightColors}};
-const lightTheme = {...baseTheme, ...lightColors, inverted: {...darkColors}};
+const darkTheme = { ...baseTheme, ...darkColors, inverted: { ...lightColors } };
+const lightTheme = { ...baseTheme, ...lightColors, inverted: { ...darkColors } };
 
-export {darkTheme, lightTheme};
+export { darkTheme, lightTheme };

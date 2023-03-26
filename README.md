@@ -53,6 +53,7 @@ GITHUB_CLIENT_SECRET
 GITHUB_APP_PRIVATE_KEY
 SENTRY_URL
 GITHUB_APP_ID
+GITHUB_APP_WEBHOOK_SECRET
 ```
 
 These secrets are exposed as environment variables.

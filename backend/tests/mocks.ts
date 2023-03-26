@@ -68,13 +68,13 @@ export const MOCK_SETUP = {
 
 const MOCK_INSTALLATION_CREATED_WEBHOOK = {
   action: 'created',
-  data: {installation: INSTALLATION},
+  data: { installation: INSTALLATION },
   installation: INSTALLATION,
 };
 
 const MOCK_INSTALLATION_DELETED_WEBHOOK = {
   action: 'deleted',
-  data: {installation: INSTALLATION},
+  data: { installation: INSTALLATION },
   installation: INSTALLATION,
 };
 

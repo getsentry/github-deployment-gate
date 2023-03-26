@@ -1,12 +1,12 @@
 import assert from 'assert';
-import {Express} from 'express';
+import { Express } from 'express';
 import request from 'supertest';
 
 import createSentryInstallation, {
   SentryInstallation,
 } from '../../factories/SentryInstallation.factory';
-import {closeTestServer, createTestServer} from '../../testutils';
-import {MOCK_WEBHOOK, UUID} from '../../mocks';
+import { MOCK_WEBHOOK, UUID } from '../../mocks';
+import { closeTestServer, createTestServer } from '../../testutils';
 
 const path = '/api/sentry/webhook/';
 
@@ -33,19 +33,19 @@ describe(`GET ${path}`, () => {
     const response = await request(server)
       .post(path)
       .send(MOCK_WEBHOOK['installation.deleted'])
-      .set({'sentry-hook-resource': 'installation'});
+      .set({ 'sentry-hook-resource': 'installation' });
     assert.equal(response.statusCode, 404);
   });
 
   it('handles installation.deleted', async () => {
-    await createSentryInstallation({uuid: UUID});
-    const newInstall = await SentryInstallation.findOne({where: {uuid: UUID}});
+    await createSentryInstallation({ uuid: UUID });
+    const newInstall = await SentryInstallation.findOne({ where: { uuid: UUID } });
     expect(newInstall).not.toBeNull();
     await request(server)
       .post(path)
       .send(MOCK_WEBHOOK['installation.deleted'])
-      .set({'sentry-hook-resource': 'installation'});
-    const oldInstall = await SentryInstallation.findOne({where: {uuid: UUID}});
+      .set({ 'sentry-hook-resource': 'installation' });
+    const oldInstall = await SentryInstallation.findOne({ where: { uuid: UUID } });
     expect(oldInstall).toBeNull();
   });
 });

@@ -1,15 +1,14 @@
-import {Column, ForeignKey, Model, Table} from 'sequelize-typescript';
+import { Column, ForeignKey, Model, Table } from 'sequelize-typescript';
 
-import SentryInstallation from './SentryInstallation.model';
 import User from './User.model';
 
-@Table({tableName: 'github_repo', underscored: true, timestamps: false})
+@Table({ tableName: 'github_repo', underscored: true, timestamps: false })
 export default class GithubRepo extends Model {
-  @Column
-  name: string;
+  @Column({ primaryKey: true, autoIncrement: true })
+  id: number;
 
   @Column
-  sentryProjectSlug: string;
+  name: string;
 
   @Column
   waitPeriodToCheckForIssue: number;
@@ -18,6 +17,6 @@ export default class GithubRepo extends Model {
   @Column
   userId: number;
 
-  @Column({defaultValue: () => true})
+  @Column({ defaultValue: () => true })
   isActive: boolean;
 }

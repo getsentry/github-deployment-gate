@@ -1,8 +1,12 @@
-import {Column, ForeignKey, Model, Table} from 'sequelize-typescript';
+import { Column, ForeignKey, Model, Table } from 'sequelize-typescript';
+
 import User from './User.model';
 
-@Table({tableName: 'sentry_installation', underscored: true, timestamps: false})
+@Table({ tableName: 'sentry_installation', underscored: true, timestamps: false })
 export default class SentryInstallation extends Model {
+  @Column({ primaryKey: true, autoIncrement: true })
+  id: number;
+
   @Column
   uuid: string;
 
@@ -22,6 +26,6 @@ export default class SentryInstallation extends Model {
   @Column
   userId: number;
 
-  @Column({defaultValue: () => new Date()})
+  @Column({ defaultValue: () => new Date() })
   createdAt: Date;
 }

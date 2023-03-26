@@ -1,4 +1,4 @@
-import {Attributes} from 'sequelize';
+import { Attributes } from 'sequelize';
 
 import User from '../../src/models/User.model';
 
@@ -11,4 +11,4 @@ export default async function createUser(
     ...fields,
   });
 }
-export {User};
+export { User };

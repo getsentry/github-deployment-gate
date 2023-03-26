@@ -1,5 +1,6 @@
-import {Column, ForeignKey, Model, Table} from 'sequelize-typescript';
-import {DeploymentProtectionRuleStatus} from '../dto/DeploymentRule.dto';
+import { Column, ForeignKey, Model, Table } from 'sequelize-typescript';
+
+import { DeploymentProtectionRuleStatus } from '../types/DeploymentRule.dto';
 import GithubRepo from './GithubRepo.model';
 
 @Table({
@@ -8,6 +9,9 @@ import GithubRepo from './GithubRepo.model';
   timestamps: false,
 })
 export default class DeploymentProtectionRuleRequest extends Model {
+  @Column({ primaryKey: true, autoIncrement: true })
+  id: number;
+
   @Column
   status: DeploymentProtectionRuleStatus;
 

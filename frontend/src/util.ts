@@ -7,7 +7,7 @@ export async function makeBackendRequest(
 ) {
   const res = await fetch(`${path}`, {
     mode: 'cors',
-    headers: {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
+    headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
     method: 'GET',
     body: JSON.stringify(data),
     ...options,

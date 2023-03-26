@@ -1,9 +1,12 @@
-import {Column, ForeignKey, HasMany, Model, Table} from 'sequelize-typescript';
+import { Column, ForeignKey, HasMany, Model, Table } from 'sequelize-typescript';
 
 import SentryInstallation from './SentryInstallation.model';
 
-@Table({tableName: 'user', underscored: true, timestamps: false})
+@Table({ tableName: 'user', underscored: true, timestamps: false })
 export default class User extends Model {
+  @Column({ primaryKey: true, autoIncrement: true })
+  id: number;
+
   @Column
   name: string;
 
