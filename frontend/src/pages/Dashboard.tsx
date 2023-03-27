@@ -31,6 +31,7 @@ function Dashboard() {
       },
       {
         enabled: Boolean(userProfile?.githubHandle),
+        refetchInterval: 60_000,
       }
     );
   const { data: sentryInstallations, isLoading: isLoadingSentryInstallations } =

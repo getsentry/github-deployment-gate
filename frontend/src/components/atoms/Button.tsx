@@ -14,6 +14,11 @@ const Button = styled.button`
     font-weight: bold;
     color: ${(p) => p.theme.surface100};
   }
+  &.secondary {
+    background: ${(p) => p.theme.red300};
+    font-weight: bold;
+    color: ${(p) => p.theme.surface100};
+  }
 `;
 
 export default Button;

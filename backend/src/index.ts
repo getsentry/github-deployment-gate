@@ -8,7 +8,7 @@ import { authRoutes } from './modules/auth/auth.routes';
 import { ghRoutes } from './modules/github/github.routes';
 import { sentryRoutes } from './modules/sentry/sentry.routes';
 
-function createServer() {
+export function createServer() {
   const server = express();
   server.use(
     bodyParser.json({

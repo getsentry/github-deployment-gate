@@ -56,6 +56,7 @@ export function DeploymentRequestRow(props: DeploymentRequestRowProps) {
       >
         <Button
           id={'approve' + deploymentRequest.id}
+          className="primary"
           style={{
             minHeight: '38px',
             margin: '1rem',
@@ -67,6 +68,7 @@ export function DeploymentRequestRow(props: DeploymentRequestRowProps) {
         </Button>
         <Button
           id={'reject-' + deploymentRequest.id}
+          className="secondary"
           style={{
             minHeight: '38px',
             margin: '1rem',

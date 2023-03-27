@@ -59,6 +59,7 @@ export function GithubRepoRow(props: GithubRepoRowProps) {
       >
         <Button
           id={'update' + repo.id}
+          className="primary"
           style={{ minHeight: '38px', margin: '1rem', width: '8rem' }}
           onClick={handleUpdate}
         >

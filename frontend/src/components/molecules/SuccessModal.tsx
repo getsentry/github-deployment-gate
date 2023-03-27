@@ -4,14 +4,15 @@ import { FaCheckCircle } from 'react-icons/fa';
 
 interface Props {
   onClose: () => void;
+  message?: string;
 }
 
-const SuccessModal = ({ onClose }: Props) => {
+const SuccessModal = ({ onClose, message }: Props) => {
   return (
     <ModalWrapper>
       <Success>
         <FaCheckCircle style={{ color: '2ecc71', fontSize: '3rem' }} />
-        <h2>Success!</h2>
+        <h2>{message ?? 'Success'}</h2>
         <CloseButton onClick={onClose}>OK</CloseButton>
       </Success>
     </ModalWrapper>

@@ -13,7 +13,7 @@ function SetupPage() {
 
   return (
     <BasePage>
-      <Main>
+      <Main style={{ textAlign: 'center' }}>
         <SentryApplicationLogo size={30} />
         {sentrySetupState === 'error' ? (
           <React.Fragment>

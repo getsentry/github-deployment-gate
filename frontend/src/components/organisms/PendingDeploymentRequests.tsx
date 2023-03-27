@@ -25,14 +25,13 @@ export function PendingDeploymentRequests(props: PendingDeploymentRequestsProps)
     })
       .then((response) => {
         if (response) {
-          utils.github.deploymentRequests.invalidate();
           utils.github.deploymentRequests.setData(
             {
               githubHandle: userProfile?.githubHandle ?? '',
             },
             (depRequests) => depRequests?.filter((depReq) => depReq.sha !== sha)
           );
-          showSuccessModal();
+          showSuccessModal(action.charAt(0).toUpperCase() + action.slice(1));
         } else {
           showFailureModal('Unable to approve/reject.');
         }
