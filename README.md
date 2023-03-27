@@ -54,6 +54,24 @@ GITHUB_APP_PRIVATE_KEY
 SENTRY_URL
 GITHUB_APP_ID
 GITHUB_APP_WEBHOOK_SECRET
+ACCESS_TOKEN_SECRET
+REFRESH_TOKEN_SECRET
+DEPLOYMENT_REQUESTS_HANDLER
 ```
 
 These secrets are exposed as environment variables.
+
+### Google Cloud Scheduler Setup
+
+Create a new job in Google Cloud Scheduler:
+
+```
+Frequency: * * * * *
+Target Type: HTTP
+URL: <value of DEPLOYMENT_REQUESTS_HANDLER>
+HTTP Method: Post
+HTTP headers:
+  -User-Agent: Google-Cloud-Scheduler
+Auth header: Add OIDC token
+Audience: <value of DEPLOYMENT_REQUESTS_HANDLER>
+```
