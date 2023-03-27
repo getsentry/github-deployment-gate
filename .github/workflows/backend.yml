@@ -1,0 +1,52 @@
+name: Backend Build & Deploy
+
+on:
+  push:
+    branches:
+      - main
+
+env:
+  GCP_SERVICE_KEY_JSON: ${{ secrets.GCP_SERVICE_KEY_JSON }}
+  GCP_PROJECT_ID: ${{ vars.GCP_PROJECT_ID }}
+  GCR_SERVICE_NAME: ${{ vars.GCR_SERVICE_NAME }}
+  GCR_REGION: ${{ vars.GCR_REGION }}
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 🏗 Setup repo
+        uses: actions/checkout@v3
+
+      - name: 🏗 Setup Node
+        uses: "./.github/actions/setup-node"
+        with:
+          project_directory: backend
+
+      - name: 🔨 Build app
+        working-directory: backend
+        run: npm run build
+
+      - name: 🏗 Setup gcloud
+        uses: "./.github/actions/setup-gcloud"
+        with:
+          service_key_json: ${{ env.GCP_SERVICE_KEY_JSON }}
+
+      - name: 🔑 Authorize Docker push
+        run: gcloud auth configure-docker
+
+      - name: 🚚 Build and Push Container
+        working-directory: backend
+        run: |-
+          docker build -t gcr.io/${{ env.GCP_PROJECT_ID }}/${{ env.GCR_SERVICE_NAME }}:latest .
+          docker push gcr.io/${{ env.GCP_PROJECT_ID }}/${{ env.GCR_SERVICE_NAME }}:latest
+
+      - name: 🚀 Deploy to Cloud Run
+        run: |-
+          gcloud run deploy ${{ env.GCR_SERVICE_NAME }} \
+            --region ${{ env.GCR_REGION }} \
+            --image gcr.io/${{ env.GCP_PROJECT_ID }}/${{ env.GCR_SERVICE_NAME }}:latest \
+            --platform "managed" \
+            --allow-unauthenticated \
+            --set-secrets=POSTGRES_HOST=POSTGRES_HOST:latest,POSTGRES_DB=POSTGRES_DB:latest,POSTGRES_PORT=POSTGRES_PORT:latest,POSTGRES_USER=POSTGRES_USER:latest,POSTGRES_PASSWORD=POSTGRES_PASSWORD:latest,SENTRY_CLIENT_ID=SENTRY_CLIENT_ID:latest,SENTRY_CLIENT_SECRET=SENTRY_CLIENT_SECRET:latest,GITHUB_CLIENT_ID=GITHUB_CLIENT_ID:latest,GITHUB_CLIENT_SECRET=GITHUB_CLIENT_SECRET:latest,GITHUB_APP_PRIVATE_KEY=GITHUB_APP_PRIVATE_KEY:latest,SENTRY_URL=SENTRY_URL:latest,GITHUB_APP_ID=GITHUB_APP_ID:latest,GITHUB_APP_WEBHOOK_SECRET=GITHUB_APP_WEBHOOK_SECRET:latest,DEPLOYMENT_REQUESTS_HANDLER=DEPLOYMENT_REQUESTS_HANDLER:latest,ACCESS_TOKEN_SECRET=ACCESS_TOKEN_SECRET:latest,REFRESH_TOKEN_SECRET=REFRESH_TOKEN_SECRET:latest \
+            --quiet

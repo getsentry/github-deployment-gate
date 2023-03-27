@@ -1,0 +1,43 @@
+name: Frontend Build & Deploy
+
+on:
+  push:
+    branches:
+      - main
+
+env:
+  REACT_APP_SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
+  REACT_APP_GITHUB_CLIENT_ID: ${{ secrets.GH_CLIENT_ID }}
+  GCP_SERVICE_KEY_JSON: ${{ secrets.GCP_SERVICE_KEY_JSON }}
+  GCS_BUCKET: ${{ vars.GCS_BUCKET }}
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 🏗 Setup repo
+        uses: actions/checkout@v3
+
+      - name: 🏗 Setup Node For Backend
+        uses: "./.github/actions/setup-node"
+        with:
+          project_directory: backend
+
+      - name: 🏗 Setup Node For Frontend
+        uses: "./.github/actions/setup-node"
+        with:
+          project_directory: frontend
+
+      - name: 🔨 Build app
+        working-directory: frontend
+        run: npm run build
+
+      - name: 🏗 Setup gcloud
+        uses: "./.github/actions/setup-gcloud"
+        with:
+          service_key_json: ${{ env.GCP_SERVICE_KEY_JSON }}
+
+      - name: 🚚 Push to GCS
+        working-directory: frontend
+        run: |-
+          gcloud storage cp build/* ${{ env.GCS_BUCKET }} --recursive

@@ -1,88 +1,48 @@
 import styled from '@emotion/styled';
-import React, {useEffect, useState} from 'react';
-import {useSearchParams} from 'react-router-dom';
+import React from 'react';
 
-import BasePage from '../components/BasePage';
-import Button from '../components/Button';
-import Main from '../components/Main';
-import SentryLogo from '../components/SentryLogo';
-import {SENTRY_INSTALLATION_ID, SENTRY_ORG_SLUG} from '../constants/browserStorage';
-import {makeBackendRequest} from '../util';
-
-const REDIRECT_TIMEOUT = 3 * 1000;
+import LinkButton from '../components/atoms/LinkButton';
+import Main from '../components/atoms/Main';
+import SentryLogo from '../components/atoms/SentryLogo';
+import BasePage from '../components/templates/BasePage';
+import { GITHUB_CLIENT_ID } from '../constants/EnvVars';
+import { useSetupSentry } from '../hooks/useSetupSentry';
 
 function SetupPage() {
-  function loginWithGithub() {
-    const scope = 'offline_access';
-    window.location.assign(
-      `https://github.com/login/oauth/authorize?client_id=${process.env.REACT_APP_GITHUB_CLIENT_ID}&scope=${scope}`
-    );
-  }
-
-  const [redirect, setRedirect] = useState('');
-  const [setupAPICallState, setSetupAPICallState] = useState('loading');
-
-  useEffect(() => {
-    console.log('use effect started');
-
-    async function createSentryInstallationEntry() {
-      const sentryInstallationId = searchParams.get('installationId');
-      const sentryOrgSlug = searchParams.get('orgSlug');
-      if (sentryInstallationId) {
-        window.localStorage.setItem(SENTRY_INSTALLATION_ID, sentryInstallationId);
-      }
-      if (sentryOrgSlug) {
-        window.localStorage.setItem(SENTRY_ORG_SLUG, sentryOrgSlug);
-      }
-      const payload = {
-        code: searchParams.get('code'),
-        installationId: sentryInstallationId,
-        sentryOrgSlug: sentryOrgSlug,
-      };
-      const response = await makeBackendRequest('/api/sentry/setup/', payload, {
-        method: 'POST',
-      });
-      setSetupAPICallState(response.status);
-      console.log(response.status);
-    }
-    createSentryInstallationEntry();
-  }, []);
-  const [searchParams] = useSearchParams();
+  const { sentrySetupState } = useSetupSentry();
 
   return (
     <BasePage>
       <Main>
         <SentryApplicationLogo size={30} />
-        {setupAPICallState === 'error' ? (
+        {sentrySetupState === 'error' ? (
           <React.Fragment>
             <h2>You can not access this page!</h2>
           </React.Fragment>
-        ) : setupAPICallState === 'success' ? (
+        ) : sentrySetupState === 'success' ? (
           <React.Fragment>
             <PreInstallTextBlock />
-            <Button className="primary" onClick={loginWithGithub}>
+            <LinkButton
+              className="primary"
+              href={`https://github.com/login/oauth/authorize?client_id=${GITHUB_CLIENT_ID}&scope=offline_access`}
+            >
               Login with Github
-            </Button>
+            </LinkButton>
           </React.Fragment>
-        ) : (
-          <></>
-        )}
+        ) : null}
       </Main>
     </BasePage>
   );
 }
+
 export const SentryApplicationLogo = styled(SentryLogo)`
-  color: ${p => p.theme.surface100};
+  color: ${(p) => p.theme.surface100};
   margin: 0 auto;
   display: block;
-  background: ${p => p.theme.gray300};
+  background: ${(p) => p.theme.gray300};
   box-sizing: content-box;
   padding: 1rem;
   border-radius: 1rem;
-`;
-
-const StyledLink = styled.a`
-  color: ${p => p.theme.blue300};
 `;
 
 const PreInstallTextBlock = () => (
