@@ -18,7 +18,12 @@ jobs:
       - name: 🏗 Setup repo
         uses: actions/checkout@v3
 
-      - name: 🏗 Setup Node
+      - name: 🏗 Setup Node For Backend
+        uses: "./.github/actions/setup-node"
+        with:
+          project_directory: backend
+
+      - name: 🏗 Setup Node For Frontend
         uses: "./.github/actions/setup-node"
         with:
           project_directory: frontend
