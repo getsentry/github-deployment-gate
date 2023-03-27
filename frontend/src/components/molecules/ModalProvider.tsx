@@ -8,7 +8,7 @@ export function ModalProvider() {
   const { isSuccessModalOpen, isFailureModalOpen, message, hide } = useModals();
   return (
     <>
-      {isSuccessModalOpen && <SuccessModal onClose={hide} />}
+      {isSuccessModalOpen && <SuccessModal onClose={hide} message={message} />}
 
       {isFailureModalOpen && <FailureModal onClose={hide} message={message} />}
     </>

@@ -5,14 +5,11 @@ import SentryLogo from '../atoms/SentryLogo';
 
 const Footer = () => (
   <StyledFooter>
-    <a
-      href="https://docs.sentry.io/product/integrations/integration-platform/"
-      className="right"
-    >
+    <a href="https://github.com/getsentry/github-deployment-gate" className="right">
       Docs
     </a>
     <SentryLogo />
-    <a href="https://github.com/getsentry/integration-platform-example">Source Code</a>
+    <a href="https://github.com/getsentry/github-deployment-gate">Source Code</a>
   </StyledFooter>
 );
 

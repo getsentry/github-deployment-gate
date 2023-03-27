@@ -1,6 +1,6 @@
 # Github Sentry Deployment Gate
 
-## Preparing GCP fo Deployment
+## Preparing GCP for Deployment
 
 ### GCP Setup
 
@@ -10,6 +10,7 @@
   - Enable Google Cloud Run
   - Enable Google Compute Engine
   - Secret Manager
+  - Google Cloud Scheduler
 - Create a bucket
   - unprotected
   - add permission `alluser`: "Cloud Storage Object Viewer"
@@ -70,8 +71,17 @@ Frequency: * * * * *
 Target Type: HTTP
 URL: <value of DEPLOYMENT_REQUESTS_HANDLER>
 HTTP Method: Post
-HTTP headers:
-  -User-Agent: Google-Cloud-Scheduler
 Auth header: Add OIDC token
 Audience: <value of DEPLOYMENT_REQUESTS_HANDLER>
+```
+
+Example:
+
+```
+Frequency: * * * * *
+Target Type: HTTP
+URL: https://www.sentrydeploymentgate.com/api/sentry/deployment-requests-handler
+HTTP Method: Post
+Auth header: Add OIDC token
+Audience: https://www.sentrydeploymentgate.com/api/sentry/deployment-requests-handler
 ```

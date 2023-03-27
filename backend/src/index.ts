@@ -8,7 +8,7 @@ import { authRoutes } from './modules/auth/auth.routes';
 import { ghRoutes } from './modules/github/github.routes';
 import { sentryRoutes } from './modules/sentry/sentry.routes';
 
-function createServer() {
+export function createServer() {
   const server = express();
   server.use(
     bodyParser.json({
@@ -18,7 +18,7 @@ function createServer() {
     })
   );
   server.use(express.json());
-  server.get('/', (_req, res) => res.status(200).json({ success: true }));
+  server.get('/', (_req, res) => res.status(200).json({ ssuccess: true }));
   server.use('/api', authRoutes);
   server.use('/api/trpc', trpcMiddleware);
   server.use('/api', ghRoutes);
