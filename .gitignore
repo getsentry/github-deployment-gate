@@ -14,6 +14,7 @@ dist
 
 # Secrets (shh!)
 .env
+*.pem
 
 # Misc
 .DS_Store
@@ -27,3 +28,7 @@ dist
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+
+# Terraform
+.terraform
+*.tfvars

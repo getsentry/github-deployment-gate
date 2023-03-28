@@ -1,0 +1,76 @@
+credentials_file = "/path/to/credentials.json"
+project          = "google-project-id"
+region           = "us-east4"
+
+sentry_polling_api = "https://github-sentry-gate.com/api/sentry/deployment-requests-handler"
+
+domain_name = "github-sentry-gate.com"
+
+frontend_gcs_bucket = {
+  name     = "bucket-for-web-frontend"
+  location = "US"
+}
+
+cloud_run_service = {
+  name         = "api"
+  location     = "US"
+  docker_image = "gcr.io/PROJECT_ID/SERVICE_NAME:latest"
+}
+
+secrets = {
+  POSTGRES_HOST = {
+    data = "192.168.3.4",
+  }
+  POSTGRES_DB = {
+    data = "gh-sentry-db",
+  }
+  POSTGRES_PORT = {
+    data = 5432,
+  }
+  POSTGRES_USER = {
+    data = "username",
+  }
+  POSTGRES_PASSWORD = {
+    data = "password",
+  }
+  SENTRY_CLIENT_ID = {
+    data = "xxxx",
+  }
+  SENTRY_CLIENT_SECRET = {
+    data = "xxxx",
+  }
+  GITHUB_CLIENT_ID = {
+    data = "xxxx",
+  }
+  GITHUB_CLIENT_SECRET = {
+    data = "xxxx",
+  }
+  SENTRY_URL = {
+    data = "https://sentry.io",
+  }
+  GITHUB_APP_ID = {
+    data = "1234",
+  }
+  GITHUB_APP_WEBHOOK_SECRET = {
+    data = "xxxx",
+  }
+  ACCESS_TOKEN_SECRET = {
+    data = "xxxx",
+  }
+  REFRESH_TOKEN_SECRET = {
+    data = "xxxx",
+  }
+  DEPLOYMENT_REQUESTS_HANDLER = {
+    data = "https://github-sentry-gate.com/api/sentry/deployment-requests-handler",
+  }
+  GITHUB_APP_PRIVATE_KEY = {
+    data = <<-EOT
+-----BEGIN RSA PRIVATE KEY-----
+xxxx
+xxxx
+xxxx
+-----END RSA PRIVATE KEY-----
+EOT
+  }
+}
+

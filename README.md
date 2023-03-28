@@ -1,8 +1,61 @@
 # Github Sentry Deployment Gate
 
-## Preparing GCP for Deployment
+## Development
 
-### GCP Setup
+1. Run `npm install` inside [backend](./backend/) and [frontend](./frontend/) directories
+2. Create and populate `.env` files inside `backend` and `frontend` directories (see [.env.sample](./.env.sample))
+3. Start the `backend` dev server: `npm run dev`. Remember to point it to a postgres database using env vars (see [.env.sample](./.env.sample))
+4. Start the `frontend` dev server: `npm run start`
+
+### Production Build
+
+#### Frontend
+
+```sh
+cd frontend
+npm run build
+```
+
+The generated static assets inside the `build` directory can be hosted on github pages, s3 or google cloud storage bucket, etc
+
+#### Backend
+
+```sh
+cd backend
+docker build -t image:tag .
+```
+
+The backend is stateless and can be deployed to serverless containers like AWS ECS, Google Cloud Run.
+
+**Note:** Github workflows are set up to deploy the application to GCP
+
+## GCP Infrastructure Setup
+
+### With Terraform
+
+1. Create an IAM service account with these roles:
+
+   - Cloud Run Admin
+   - Cloud Scheduler Admin
+   - Cloud Scheduler Service Agent
+   - Compute Instance Admin (beta)
+   - Compute Load Balancer Admin
+   - Compute Viewer
+   - Secret Manager Admin
+   - Security Reviewer
+   - Storage Admin
+   - IAM Admin
+   - Service Usage Admin
+
+2. Download and activate the service account key
+3. Run [infra/scripts/enable_apis.sh](./infra/scripts/enable_apis.sh). Enable the IAM API manually
+4. Populate [variables.tf](./infra/variables.tf) and create `terraform.tfvars` (see [terraform.tfvars.example](./infra/terraform.tfvars.example))
+5. Run `terraform init` followed by `terraform apply` inside the [infra](./infra/) directory
+6. After a successful run the IP address of the load balancer is displayed in the console. Connect your domain/subdomain by creating an A record like so: `www A 1.2.3.4`, `@ A 1.2.3.4`, etc
+
+Note: Provisioning the SSL Certificate can take upwards of 30 minutes after the DNS A record is created
+
+### Manual Setup
 
 - Enable Google APIs:
   - Cloud Storage
@@ -34,54 +87,5 @@
   - add the GCR service as another backend service
   - enable SSL
 - Connect your domain to your load balancer
-  - After the load balancer is created, note the IP address that is associated with the load balancer, for example, 1.2.3.4
-  - create an A record like so: `www A 1.2.3.4`, `@ A 1.2.3.4`, etc
-
-### App Secrets
-
-Create these secrets in the secret manager:
-
-```
-POSTGRES_HOST
-POSTGRES_DB
-POSTGRES_PORT
-POSTGRES_USER
-POSTGRES_PASSWORD
-SENTRY_CLIENT_ID
-SENTRY_CLIENT_SECRET
-GITHUB_CLIENT_ID
-GITHUB_CLIENT_SECRET
-GITHUB_APP_PRIVATE_KEY
-SENTRY_URL
-GITHUB_APP_ID
-GITHUB_APP_WEBHOOK_SECRET
-ACCESS_TOKEN_SECRET
-REFRESH_TOKEN_SECRET
-DEPLOYMENT_REQUESTS_HANDLER
-```
-
-These secrets are exposed as environment variables.
-
-### Google Cloud Scheduler Setup
-
-Create a new job in Google Cloud Scheduler:
-
-```
-Frequency: * * * * *
-Target Type: HTTP
-URL: <value of DEPLOYMENT_REQUESTS_HANDLER>
-HTTP Method: Post
-Auth header: Add OIDC token
-Audience: <value of DEPLOYMENT_REQUESTS_HANDLER>
-```
-
-Example:
-
-```
-Frequency: * * * * *
-Target Type: HTTP
-URL: https://www.sentrydeploymentgate.com/api/sentry/deployment-requests-handler
-HTTP Method: Post
-Auth header: Add OIDC token
-Audience: https://www.sentrydeploymentgate.com/api/sentry/deployment-requests-handler
-```
+  - After the load balancer is created, copy the IP address associated with it
+  - Connect your domain/subdomain by creating an A an A record like so: `www A 1.2.3.4`, `@ A 1.2.3.4`, etc
