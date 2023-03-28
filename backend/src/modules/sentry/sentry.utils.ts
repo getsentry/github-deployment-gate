@@ -1,4 +1,5 @@
 import { OAuth2Client } from 'google-auth-library';
+import { Op } from 'sequelize';
 
 import { appConfig } from '../../config';
 import DeploymentProtectionRuleRequest from '../../models/DeploymentProtectionRuleRequest.model';
@@ -80,6 +81,25 @@ export async function processDeploymentRules() {
   );
 }
 
+// This method will renew refresh tokens for all Sentry Intallations which are going to be expired in next one hour
+export async function renewRefreshTokens() {
+  const now = new Date();
+  // Subtract 1 hour from current time
+  now.setHours(now.getHours() + 1);
+  const sentryInstallations = await SentryInstallation.findAll({
+    where: {
+      expiresAt: {
+        [Op.lte]: now,
+      },
+    },
+  });
+  await Promise.all(
+    sentryInstallations.map(sentryInstallation => {
+      SentryAPIClient.renewSentryAPITokens(sentryInstallation.uuid);
+    })
+  );
+}
+
 export async function processDeploymentProtectionRuleRequest(
   request: DeploymentProtectionRuleRequest
 ) {
@@ -127,12 +147,12 @@ export async function findOrUpdateInstallation(
   }
 }
 
-export async function verifyIDToken(token: string): Promise<boolean> {
-  const oAuth2Client = new OAuth2Client(appConfig.deploymentRequestsHandler);
+export async function verifyIDToken(token: string, url: string): Promise<boolean> {
+  const oAuth2Client = new OAuth2Client(url);
   try {
     await oAuth2Client.verifyIdToken({
       idToken: token,
-      audience: appConfig.deploymentRequestsHandler,
+      audience: url,
     });
     return true;
   } catch (ex) {

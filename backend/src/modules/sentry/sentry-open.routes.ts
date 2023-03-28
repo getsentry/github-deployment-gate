@@ -4,7 +4,11 @@ import express from 'express';
 import { appConfig } from '../../config';
 import SentryInstallation from '../../models/SentryInstallation.model';
 import { InstallResponseData, TokenResponseData } from './sentry.types';
-import { processDeploymentRules, verifyIDToken } from './sentry.utils';
+import {
+  processDeploymentRules,
+  verifyIDToken,
+  renewRefreshTokens,
+} from './sentry.utils';
 
 export const sentryOpenRoutes = express.Router();
 
@@ -85,12 +89,30 @@ sentryOpenRoutes.post('/deployment-requests-handler', async (req, res) => {
     res.status(403).json({});
     return;
   }
-  const isValid = await verifyIDToken(idToken);
+  const isValid = await verifyIDToken(idToken, appConfig.deploymentRequestsHandler);
   if (!isValid) {
     res.status(403).json({});
     return;
   }
   processDeploymentRules();
+  res.status(200).json({
+    status: 'success',
+  });
+});
+
+sentryOpenRoutes.post('/renew-refresh-token', async (req, res) => {
+  console.log('renew-refresh-token');
+  const idToken = req.headers.authorization?.split('Bearer ')[1];
+  if (!idToken) {
+    res.status(403).json({});
+    return;
+  }
+  const isValid = await verifyIDToken(idToken, appConfig.renewSentryTokensHandler);
+  if (!isValid) {
+    res.status(403).json({});
+    return;
+  }
+  renewRefreshTokens();
   res.status(200).json({
     status: 'success',
   });

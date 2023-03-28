@@ -9,6 +9,7 @@ gcloud services enable \
   storage.googleapis.com \
   run.googleapis.com \
   cloudscheduler.googleapis.com \
-  iam.googleapis.com
+  iam.googleapis.com \
+  sqladmin.googleapis.com
 
 echo "Done"

@@ -3,6 +3,7 @@ project          = "google-project-id"
 region           = "us-east4"
 
 sentry_polling_api = "https://github-sentry-gate.com/api/sentry/deployment-requests-handler"
+renew_sentry_tokens_api = "https://github-sentry-gate.com/api/sentry/renew-refresh-token"
 
 domain_name = "github-sentry-gate.com"
 
@@ -10,6 +11,10 @@ frontend_gcs_bucket = {
   name     = "bucket-for-web-frontend"
   location = "US"
 }
+
+# true -> create and use a Google-managed postgres db
+# false -> bring your own db
+use_cloud_sql = true
 
 cloud_run_service = {
   name         = "api"
@@ -19,6 +24,7 @@ cloud_run_service = {
 
 secrets = {
   POSTGRES_HOST = {
+    # if using Google-managed db -> "/cloudsql/PROJECT_ID:REGION:SQL_INSTANCE"
     data = "192.168.3.4",
   }
   POSTGRES_DB = {
@@ -62,6 +68,9 @@ secrets = {
   }
   DEPLOYMENT_REQUESTS_HANDLER = {
     data = "https://github-sentry-gate.com/api/sentry/deployment-requests-handler",
+  }
+  RENEW_SENTRY_TOKENS_HANDLER = {
+    data = "https://github-sentry-gate.com/api/sentry/renew-refresh-token",
   }
   GITHUB_APP_PRIVATE_KEY = {
     data = <<-EOT

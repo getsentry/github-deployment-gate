@@ -55,7 +55,63 @@ export class SentryAPIClient {
 
     // Store the token information for future requests
     const { token, refreshToken, expiresAt } = tokenResponse.data;
-    const updatedSentryInstallation = await sentryInstallation.update({
+    const installation = await SentryInstallation.findOne({
+      where: { uuid: sentryInstallationUUID },
+    });
+
+    const updatedSentryInstallation = await installation.update({
+      token,
+      refreshToken,
+      expiresAt: new Date(expiresAt),
+    });
+    console.info(`Token for '${updatedSentryInstallation.orgSlug}' has been refreshed.`);
+
+    // Return the newly refreshed token
+    return updatedSentryInstallation.token;
+  }
+
+  /**
+   * Fetches an organization's Sentry API token, refreshing it.
+   */
+  static async renewSentryAPITokens(sentryInstallationUUID: string) {
+    const sentryInstallation = await SentryInstallation.findOne({
+      where: { uuid: sentryInstallationUUID },
+    }).then(resp => resp?.get());
+
+    if (!sentryInstallation) {
+      throw new Error(
+        `Sentry installation not found for UUID: ${sentryInstallationUUID}`
+      );
+    }
+
+    console.info(`Refreshing...`);
+    // Construct a payload to ask Sentry for a new token
+    const payload = {
+      grant_type: 'refresh_token',
+      refresh_token: sentryInstallation.refreshToken,
+      client_id: appConfig.sentry.clientId,
+      client_secret: appConfig.sentry.clientSecret,
+    };
+
+    // Send that payload to Sentry and parse the response
+    const tokenResponse: { data: TokenResponseData } = await axios
+      .post(
+        `${appConfig.sentry.url}/api/0/sentry-app-installations/${sentryInstallation.uuid}/authorizations/`,
+        payload
+      )
+      .catch(function (error) {
+        console.log('Error in renewSentryAPITokens');
+        handleAxiosError(error);
+        throw new Error(error.message);
+      });
+
+    // Store the token information for future requests
+    const { token, refreshToken, expiresAt } = tokenResponse.data;
+    const installation = await SentryInstallation.findOne({
+      where: { uuid: sentryInstallationUUID },
+    });
+
+    const updatedSentryInstallation = await installation.update({
       token,
       refreshToken,
       expiresAt: new Date(expiresAt),

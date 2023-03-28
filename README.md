@@ -8,7 +8,7 @@
 - Click on "Accept and Install".
 - Once you install the Sentry integration you will be redirected to the web application where you need to login via Github in order to connect your account with the Sentry account.
 
-`Note: Your login details can only be connected to one Sentry account. If you install Sentry integration in another account and try to connect with same Github login, then the application will no longer be able to fetch issue from the previous Sentry account releases.`
+**_Note:_** _Your login details can only be connected to one Sentry account. If you install Sentry integration in another account and try to connect with same Github login, then the application will no longer be able to fetch issue from the previous Sentry account releases._
 
 - You will be able to see all the Github repos after login into the web application where you can configure the wait time for which the application will keep looking for any new issue before passing/rejecting the deployment gate.
 - Once any deployment starts in any of the github repo where the Github app is installed, a new deployment gate request will appear with in a minute under "Pending deployment request" section in the web app.
@@ -76,9 +76,10 @@ Variables:
    - Storage Admin
    - IAM Admin
    - Service Usage Admin
+   - Cloud SQL Admin
 
 2. Download and activate the service account key
-3. Run [infra/scripts/enable_apis.sh](./infra/scripts/enable_apis.sh). Enable the IAM API manually
+3. Run [infra/scripts/enable_apis.sh](./infra/scripts/enable_apis.sh)
 4. Populate [variables.tf](./infra/variables.tf) and create `terraform.tfvars` (see [terraform.tfvars.example](./infra/terraform.tfvars.example))
 5. Run `terraform init` followed by `terraform apply` inside the [infra](./infra/) directory
 6. After a successful run the IP address of the load balancer is displayed in the console. Connect your domain/subdomain by creating an A record like so: `www A 1.2.3.4`, `@ A 1.2.3.4`, etc
@@ -94,6 +95,8 @@ Note: Provisioning the SSL Certificate can take upwards of 30 minutes after the 
   - Enable Google Compute Engine
   - Secret Manager
   - Google Cloud Scheduler
+  - Identity Access Management
+  - SQL Admin
 - Create a bucket
   - unprotected
   - add permission `alluser`: "Cloud Storage Object Viewer"

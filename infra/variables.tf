@@ -17,6 +17,12 @@ variable "container_registry_location" {
   default     = "US"
 }
 
+variable "use_cloud_sql" {
+  description = "Turn this on to create a Google managed SQL instance. If you bring your own database, set this to false."
+  type        = bool
+  default     = false
+}
+
 # use terraform.tfvars to override this with your app image
 # see terraform.tfvars.example
 variable "cloud_run_service" {
@@ -28,6 +34,8 @@ variable "cloud_run_service" {
 }
 
 variable "sentry_polling_api" {}
+variable "renew_sentry_tokens_api" {}
+
 
 variable "domain_name" {
   description = "domain/subdomain name to be used for the load balancer"

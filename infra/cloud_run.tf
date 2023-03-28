@@ -21,7 +21,17 @@ resource "google_cloud_run_service" "default" {
         }
       }
     }
+
+    dynamic "metadata" {
+      for_each = var.use_cloud_sql ? toset(["1"]) : []
+      content {
+        annotations = {
+          "run.googleapis.com/cloudsql-instances" = google_sql_database_instance.default["1"].connection_name
+        }
+      }
+    }
   }
+  autogenerate_revision_name = true
 }
 
 resource "google_cloud_run_service_iam_member" "default" {

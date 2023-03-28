@@ -49,4 +49,5 @@ export const appConfig = {
   accessTokenSecret: process.env.ACCESS_TOKEN_SECRET ?? '',
   refreshTokenSecret: process.env.REFRESH_TOKEN_SECRET ?? '',
   deploymentRequestsHandler: process.env.DEPLOYMENT_REQUESTS_HANDLER ?? '',
+  renewSentryTokensHandler: process.env.RENEW_SENTRY_TOKENS_HANDLER ?? '',
 };
