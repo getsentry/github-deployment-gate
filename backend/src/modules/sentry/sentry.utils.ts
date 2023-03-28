@@ -55,7 +55,8 @@ export async function checkForNewIssue(
               installationId,
               deploymentCallbackUrl,
               environment,
-              DeploymentProtectionRuleStatus.REJECTED
+              DeploymentProtectionRuleStatus.REJECTED,
+              `Found new issues in Sentry - https://${sentryInstallation.orgSlug}.sentry.io/releases/${releaseId}`
             );
           }
         }
@@ -98,7 +99,8 @@ export async function processDeploymentProtectionRuleRequest(
         request.installationId,
         request.deploymentCallbackUrl,
         request.environment,
-        DeploymentProtectionRuleStatus.APPROVED
+        DeploymentProtectionRuleStatus.APPROVED,
+        'No new issues'
       );
     } else {
       // Else call the method to find for new issues for a particular release and call GH api with rejected status

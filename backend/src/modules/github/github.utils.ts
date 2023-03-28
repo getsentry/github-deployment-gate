@@ -83,7 +83,7 @@ export async function callGHPassFailAPI(
   deploymentCallbackUrl: string,
   environment: string,
   status: DeploymentProtectionRuleStatus,
-  comment?: string
+  comment: string
 ) {
   const jwtToken = await generateGHAppJWT();
   const installationToken = await getGithubInstallationAccessToken(
@@ -97,11 +97,7 @@ export async function callGHPassFailAPI(
       installationToken,
       {
         state: status,
-        comment: comment
-          ? comment
-          : status === DeploymentProtectionRuleStatus.REJECTED
-          ? 'Found new issues in Sentry '
-          : 'No new issues',
+        comment: comment,
         environment_name: environment,
       }
     );
