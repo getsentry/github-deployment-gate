@@ -86,6 +86,27 @@ Variables:
 
 Note: Provisioning the SSL Certificate can take upwards of 30 minutes after the DNS A record is created
 
+### Kubernetes
+
+1. Build frontend docker image
+
+```sh
+docker build -f Dockerfile.frontend \
+  -t github-sentry-frontend:latest \
+  --build-arg REACT_APP_SENTRY_DSN=https://xxxx.sentry.io/1234 \
+  --build-arg REACT_APP_GITHUB_CLIENT_ID=abc123 .
+```
+
+2. Build backend docker image
+
+```sh
+docker build -f Dockerfile.backend -t github-sentry-backend:latest .
+```
+
+3. Update [backend-config](./infra/k8s/backend-config.yaml)
+4. Create `infra/k8s/backend-secrets.yaml` using [backend-secrets.yaml.example](./infra/k8s/backend-secrets.yaml.example) as the template
+5. Spin up the cluster Using the config files inside [infra/k8s](./infra/k8s/)
+
 ### Manual Setup
 
 - Enable Google APIs:
