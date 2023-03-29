@@ -46,6 +46,7 @@ export const appConfig = {
   sentry,
   isTestMode,
   port: process.env.PORT,
+  sentryDSN: process.env.SENTRY_DSN ?? '',
   accessTokenSecret: process.env.ACCESS_TOKEN_SECRET ?? '',
   refreshTokenSecret: process.env.REFRESH_TOKEN_SECRET ?? '',
   deploymentRequestsHandler: process.env.DEPLOYMENT_REQUESTS_HANDLER ?? '',

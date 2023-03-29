@@ -1,8 +1,9 @@
 import assert from 'assert';
-import request from 'supertest';
 import { Express } from 'express';
+import request from 'supertest';
 
 import { appConfig } from '../../../src/config';
+import DeploymentProtectionRuleRequest from '../../../src/models/DeploymentProtectionRuleRequest.model';
 import GithubRepo from '../../../src/models/GithubRepo.model';
 import {
   MOCK_GITHUB_DEPLOY_REQUESTED,
@@ -11,9 +12,7 @@ import {
   MOCK_GITHUB_REPO_DELETED,
   MOCK_GITHUB_REPO_REMOVED,
 } from '../../mocks';
-
 import { createTestServer } from '../../testutils';
-import DeploymentProtectionRuleRequest from '../../../src/models/DeploymentProtectionRuleRequest.model';
 
 const path = '/api/github/webhook/deploymentRule';
 

@@ -1,9 +1,8 @@
 import assert from 'assert';
-import request from 'supertest';
 import { Express } from 'express';
+import request from 'supertest';
 
 import { appConfig } from '../../../src/config';
-
 import { createTestServer } from '../../testutils';
 
 const path = '/api/sentry/deployment-requests-handler';

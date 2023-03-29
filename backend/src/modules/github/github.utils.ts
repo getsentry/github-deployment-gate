@@ -1,7 +1,7 @@
 import axios from 'axios';
-import { InferAttributes } from 'sequelize';
-import { App } from 'octokit';
 import * as jwt from 'jsonwebtoken';
+import { App } from 'octokit';
+import { InferAttributes } from 'sequelize';
 
 import { appConfig } from '../../config';
 import DeploymentProtectionRuleRequest from '../../models/DeploymentProtectionRuleRequest.model';

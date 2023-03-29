@@ -1,3 +1,5 @@
+import * as Sentry from '@sentry/node';
+import * as Tracing from '@sentry/tracing';
 import bodyParser from 'body-parser';
 import express from 'express';
 
@@ -10,6 +12,26 @@ import { sentryRoutes } from './modules/sentry/sentry.routes';
 
 export function createServer() {
   const server = express();
+
+  Sentry.init({
+    dsn: 'https://8a019ebce68042ea9b79c819fb2de429@o1.ingest.sentry.io/4504922584317952',
+    integrations: [
+      // enable HTTP calls tracing
+      new Sentry.Integrations.Http({ tracing: true }),
+      // enable Express.js middleware tracing
+      new Tracing.Integrations.Express({ app: server }),
+    ],
+    // Set tracesSampleRate to 1.0 to capture 100%
+    // of transactions for performance monitoring.
+    // We recommend adjusting this value in production
+    tracesSampleRate: 1.0,
+  });
+  // RequestHandler creates a separate execution context using domains, so that every
+  // transaction/span/breadcrumb is attached to its own Hub instance
+  server.use(Sentry.Handlers.requestHandler());
+  // TracingHandler creates a trace for every incoming request
+  server.use(Sentry.Handlers.tracingHandler());
+
   server.use(
     bodyParser.json({
       verify: (req, res, buf) => {
@@ -23,6 +45,11 @@ export function createServer() {
   server.use('/api/trpc', trpcMiddleware);
   server.use('/api', ghRoutes);
   server.use('/api', sentryRoutes);
+  server.use('/health', async function (req, res) {
+    res.status(200);
+  });
+  server.use(Sentry.Handlers.errorHandler());
+  server.use(express.static('public'));
 
   return server;
 }

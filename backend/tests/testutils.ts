@@ -1,5 +1,5 @@
-import { Sequelize } from 'sequelize-typescript';
 import { newDb } from 'pg-mem';
+import { Sequelize } from 'sequelize-typescript';
 
 import { createServer } from '../src/index';
 import DeploymentProtectionRuleRequest from '../src/models/DeploymentProtectionRuleRequest.model';
