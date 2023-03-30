@@ -5,5 +5,7 @@ cd $SCRIPT_DIR/../frontend;
 npm run build
 cp -r $SCRIPT_DIR/../frontend/build/* $SCRIPT_DIR/../backend/src/public/
 cd $SCRIPT_DIR/../backend; 
-docker build -t mikejihbe/github-deployment-gate:latest .
-docker push mikejihbe/github-deployment-gate:latest
+docker buildx build \
+  --platform linux/arm/v7,linux/arm64/v8,linux/amd64 \
+  --tag getsentry/github-deployment-gate:latest \
+  .
