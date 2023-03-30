@@ -2,11 +2,11 @@ FROM node:16-alpine
 
 WORKDIR /app
 
-COPY backend/package.json .
-COPY backend/package-lock.json .
+COPY package.json .
+COPY package-lock.json .
 RUN npm ci
 
-COPY backend/ .
+COPY . .
 
 RUN npm run build
 

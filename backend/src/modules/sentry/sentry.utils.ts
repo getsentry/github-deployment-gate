@@ -1,6 +1,7 @@
 import { OAuth2Client } from 'google-auth-library';
 import { Op } from 'sequelize';
 
+import { appConfig } from '../../config';
 import DeploymentProtectionRuleRequest from '../../models/DeploymentProtectionRuleRequest.model';
 import GithubRepo from '../../models/GithubRepo.model';
 import SentryInstallation from '../../models/SentryInstallation.model';
