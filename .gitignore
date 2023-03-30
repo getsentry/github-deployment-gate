@@ -34,3 +34,5 @@ yarn-error.log*
 *.tfvars
 
 backend-secrets.yaml
+
+backend/src/public/*
