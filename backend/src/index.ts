@@ -9,6 +9,7 @@ import { sequelize } from './models';
 import { authRoutes } from './modules/auth/auth.routes';
 import { ghRoutes } from './modules/github/github.routes';
 import { sentryRoutes } from './modules/sentry/sentry.routes';
+import path from 'path';
 
 export function createServer() {
   const server = express();
@@ -40,16 +41,19 @@ export function createServer() {
     })
   );
   server.use(express.json());
-  server.get('/', (_req, res) => res.status(200).json({ ssuccess: true }));
+  server.get('/', (_req, res) => res.status(200).json({ success: true }));
   server.use('/api', authRoutes);
   server.use('/api/trpc', trpcMiddleware);
   server.use('/api', ghRoutes);
   server.use('/api', sentryRoutes);
-  server.use('/health', async function (req, res) {
-    res.status(200);
+  server.use('/health', function (_req, res) {
+    res.status(200).json({ status: 'ok' });
   });
   server.use(Sentry.Handlers.errorHandler());
-  server.use(express.static('public'));
+  server.use(express.static(path.join(__dirname, 'public')));
+  server.get('/*', (_req, res) => {
+    res.sendFile(__dirname + '/public/index.html');
+  });
 
   return server;
 }
