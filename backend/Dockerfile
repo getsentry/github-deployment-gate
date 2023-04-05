@@ -9,5 +9,6 @@ RUN npm ci
 COPY . .
 
 RUN npm run build
+COPY ./src/public ./dist/public
 
 CMD ["npm", "start"]
