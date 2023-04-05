@@ -10,7 +10,8 @@ mkdir -p $SCRIPT_DIR/../backend/src/public
 echo "cp -r $SCRIPT_DIR/../frontend/build/* $SCRIPT_DIR/../backend/src/public/"
 cp -r $SCRIPT_DIR/../frontend/build/* $SCRIPT_DIR/../backend/src/public/
 cd $SCRIPT_DIR/../backend; 
+SHA=$(git rev-parse HEAD)
 docker build \
   --platform linux/amd64 \
-  --tag getsentry/github-deployment-gate:latest \
+  --tag us.gcr.io/internal-sentry/github-getsentry-github-deployment-gate:${SHA} \
   .
