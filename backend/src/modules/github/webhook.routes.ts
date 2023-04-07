@@ -18,12 +18,12 @@ ghWebhookRoutes.post('/deploymentRule', async function (req, res) {
     case DeploymentRuleAction.ADDED:
       if (deploymentRule.repositories_added) {
         let user = await User.findOne({
-          where: { githubHandle: deploymentRule.installation.account.login },
+          where: { githubHandle: deploymentRule.sender.login },
         });
         if (!user) {
           user = await User.create({
-            name: deploymentRule.installation.account.login,
-            githubHandle: deploymentRule.installation.account.login,
+            name: deploymentRule.sender.login,
+            githubHandle: deploymentRule.sender.login,
             avatar: deploymentRule.installation.account.avatar_url,
           });
         }
@@ -40,7 +40,7 @@ ghWebhookRoutes.post('/deploymentRule', async function (req, res) {
                 isActive: true,
               });
             } else {
-              githubRepo.update({ isActive: true });
+              githubRepo.update({ isActive: true, userId: user.id });
             }
           })
         );
@@ -49,12 +49,12 @@ ghWebhookRoutes.post('/deploymentRule', async function (req, res) {
     case DeploymentRuleAction.CREATED:
       if (deploymentRule.repositories) {
         let user = await User.findOne({
-          where: { githubHandle: deploymentRule.installation.account.login },
+          where: { githubHandle: deploymentRule.sender.login },
         });
         if (!user) {
           user = await User.create({
-            name: deploymentRule.installation.account.login,
-            githubHandle: deploymentRule.installation.account.login,
+            name: deploymentRule.sender.login,
+            githubHandle: deploymentRule.sender.login,
             avatar: deploymentRule.installation.account.avatar_url,
           });
         }
@@ -72,7 +72,7 @@ ghWebhookRoutes.post('/deploymentRule', async function (req, res) {
                 isActive: true,
               });
             } else {
-              githubRepo.update({ isActive: true });
+              githubRepo.update({ isActive: true, userId: user.id });
             }
           })
         );
