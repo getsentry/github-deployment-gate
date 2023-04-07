@@ -55,14 +55,15 @@ function Dashboard() {
               <>
                 <p>
                   You have not installed our Github app SentryDeploymentGate on any of
-                  your Github Repo yet. Please install Github App SentryDeploymentGate via
-                  this link:{' '}
+                  your Github Repo yet. You must be the person that installed the
+                  application to view repos on this list. Please install Github App
+                  SentryDeploymentGate via this link:{' '}
                   <a
-                    href="https://github.com/apps/sentrydeploymentgate"
+                    href="https://github.com/apps/sentry-deployment-gate"
                     target="_blank"
                     rel="noreferrer"
                   >
-                    https://github.com/apps/sentrydeploymentgate
+                    https://github.com/apps/sentry-deployment-gate
                   </a>
                 </p>
               </>

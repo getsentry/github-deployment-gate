@@ -41,7 +41,7 @@ export function createServer() {
     })
   );
   server.use(express.json());
-  server.get('/', (_req, res) => res.status(200).json({ success: true }));
+  // server.get('/', (_req, res) => res.status(200).json({ success: true }));
   server.use('/api', authRoutes);
   server.use('/api/trpc', trpcMiddleware);
   server.use('/api', ghRoutes);
@@ -60,6 +60,8 @@ export function createServer() {
 
 function start() {
   const port = appConfig.port;
+
+  console.log("Starting up...Process environment:", process.env)
 
   sequelize
     .authenticate()
