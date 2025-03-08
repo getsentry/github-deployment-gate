@@ -26,7 +26,7 @@
     "@sentry/node": "^7.45.0",
     "@sentry/tracing": "^7.45.0",
     "@trpc/server": "^10.18.0",
-    "axios": "^0.26.0",
+    "axios": "^1.8.2",
     "express": "^4.17.3",
     "google-auth-library": "^8.7.0",
     "jsonwebtoken": "^8.5.1",
