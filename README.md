@@ -1,3 +1,6 @@
+> **Warning**
+> This integration is being deprecated, and will eventually be removed.
+
 # Github Sentry Deployment Gate
 
 ## Usage
