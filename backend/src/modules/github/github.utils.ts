@@ -90,7 +90,7 @@ export async function callGHPassFailAPI(
     installationId,
     jwtToken
   );
-  console.log('installationToken', installationToken);
+
   if (installationToken) {
     const apiResponse = await respondToDeploymentProtectionRule(
       deploymentCallbackUrl,
