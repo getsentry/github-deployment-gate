@@ -62,7 +62,7 @@ export function createServer() {
 function start() {
   const port = appConfig.port;
 
-  console.log("Starting up...Process environment:", process.env)
+  console.log("Starting up...")
 
   sequelize
     .authenticate()
