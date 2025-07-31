@@ -35,7 +35,7 @@ export function createServer() {
 
   server.use(
     bodyParser.json({
-      limit: '200kb',
+      limit: '10mb',
       verify: (req, res, buf) => {
         (<any>req).rawBody = buf;
       },
