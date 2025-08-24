@@ -30,7 +30,7 @@
     "express": "^4.17.3",
     "google-auth-library": "^8.7.0",
     "jsonwebtoken": "^8.5.1",
-    "octokit": "^2.0.14",
+    "octokit": "^4.1.2",
     "passport": "^0.6.0",
     "passport-github": "^1.1.0",
     "passport-jwt": "^4.0.1",
